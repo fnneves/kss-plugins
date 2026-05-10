@@ -1,0 +1,17 @@
+{
+  "name": "kss-plugins",
+  "owner": {
+    "name": "kss-plugins maintainers"
+  },
+  "description": "Solo dev plugins with reduced ceremony and high customization.",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "kss",
+      "source": "kss",
+      "description": "Keep Shit Simple — solo dev framework with reduced ceremony and high customization. Session-driven workflow with topics, milestones, spikes, and an optional self-improvement loop."
+    }
+  ]
+}

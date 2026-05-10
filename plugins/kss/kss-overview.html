@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kss — what it solves & how it improves itself</title>
+<style>
+  :root {
+    --ivory: #FAF9F5; --paper: #FFFFFF; --slate: #141413;
+    --clay: #D97757; --clay-d: #B85C3E;
+    --oat: #E3DACC; --olive: #788C5D; --sky: #6A8CAF;
+    --g100: #F0EEE6; --g200: #E6E3DA; --g300: #D1CFC5;
+    --g500: #87867F; --g700: #3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--ivory); color: var(--g700); font-family: var(--sans);
+    font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+    padding: 56px 32px 120px; }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  h1 { font-family: var(--serif); font-weight: 500;
+    font-size: clamp(34px, 4.4vw, 48px); line-height: 1.08;
+    letter-spacing: -0.018em; color: var(--slate);
+    margin-bottom: 14px; max-width: 22ch; }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 { font-family: var(--serif); font-weight: 500; font-size: 26px;
+    color: var(--slate); letter-spacing: -0.012em; margin: 0 0 8px; }
+  h3 { font-family: var(--serif); font-weight: 500; font-size: 19px;
+    color: var(--slate); letter-spacing: -0.008em; margin: 0 0 8px; }
+  h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--g500); margin: 0 0 8px; }
+  p { margin: 0 0 10px; max-width: 68ch; }
+  .lead { font-size: 16.5px; color: var(--g700); margin-bottom: 16px; max-width: 64ch; }
+  .muted { color: var(--g500); }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px; }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); }
+
+  code { font-family: var(--mono); font-size: 13px; background: var(--g100);
+    padding: 1px 6px; border-radius: 4px; color: var(--slate); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 1000px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card { background: var(--paper); border: 1.5px solid var(--g300);
+    border-radius: 14px; padding: 24px; }
+  .card-tight { padding: 16px 18px; }
+  .card-soft { background: var(--g100); border-color: var(--g200); }
+  .card-emph { border-color: var(--slate); box-shadow: 0 12px 32px rgba(20,20,19,.08); }
+
+  section { margin-top: 56px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .sec-head .idx { font-family: var(--mono); font-size: 13px; color: var(--clay);
+    font-weight: 600; width: 32px; flex-shrink: 0; }
+  .sec-head .count { font-family: var(--mono); font-size: 11px; color: var(--g500);
+    background: var(--g100); padding: 2px 10px; border-radius: 999px; }
+  .sec-intro { font-size: 14.5px; color: var(--g700); margin: 0 0 24px 48px; max-width: 68ch; }
+
+  .pill { display: inline-block; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.04em; padding: 2px 10px; border-radius: 999px;
+    background: var(--g100); color: var(--g700); border: 1px solid var(--g200);
+    vertical-align: middle; }
+  .pill-clay { background: rgba(217,119,87,0.12); color: var(--clay-d); border-color: rgba(217,119,87,0.25); }
+  .pill-olive { background: rgba(120,140,93,0.14); color: var(--olive); border-color: rgba(120,140,93,0.25); }
+  .pill-sky { background: rgba(106,140,175,0.14); color: var(--sky); border-color: rgba(106,140,175,0.25); }
+  .pill-oat { background: var(--oat); color: var(--slate); border-color: transparent; }
+  .pill-slate { background: var(--slate); color: var(--ivory); border-color: transparent; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 32px; }
+  nav.toc a { font-size: 12.5px; padding: 7px 14px; border: 1.5px solid var(--g300);
+    border-radius: 999px; text-decoration: none; color: var(--g700);
+    background: var(--paper); display: inline-flex; align-items: center;
+    gap: 7px; transition: border-color 120ms, color 120ms; }
+  nav.toc a .n { font-family: var(--mono); font-size: 10px; color: var(--g500); }
+  nav.toc a:hover { border-color: var(--slate); color: var(--slate); }
+  nav.toc a:hover .n { color: var(--clay); }
+
+  .card-finding {
+    background: linear-gradient(180deg, var(--paper) 0%, #FBF6F1 100%);
+    border: 1.5px solid var(--g300);
+    border-left: 3px solid var(--clay);
+    border-radius: 12px;
+    padding: 22px 26px;
+  }
+  .card-finding h4 { color: var(--clay); }
+  .card-finding p { font-size: 15px; }
+
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1.5px solid var(--g300); border-radius: 12px; overflow: hidden;
+  }
+  .compare > div { padding: 22px 24px; }
+  .compare > div:first-child { border-right: 1.5px solid var(--g300); background: var(--g100); }
+  .compare h4 { margin-bottom: 12px; }
+  .compare ul { padding-left: 20px; font-size: 14px; }
+  .compare li { margin-bottom: 6px; }
+  @media (max-width: 800px) {
+    .compare { grid-template-columns: 1fr; }
+    .compare > div:first-child { border-right: none; border-bottom: 1.5px solid var(--g300); }
+  }
+
+  .quote { font-family: var(--serif); font-style: italic; font-size: 18px;
+    color: var(--slate); padding-left: 18px; border-left: 3px solid var(--clay);
+    margin: 24px 0; max-width: 60ch; }
+
+  footer { margin-top: 80px; padding-top: 32px; border-top: 1.5px solid var(--g300);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    flex-wrap: wrap; font-size: 13px; color: var(--g500); }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header style="margin-bottom: 24px;">
+    <div class="eyebrow">kss · overview</div>
+    <h1>Keep Shit <em>Simple</em></h1>
+    <p class="lead">A solo-dev framework for Claude Code with reduced ceremony, durable state across sessions, and an opt-in self-improvement loop. Eleven small skills, a clean folder convention, and one rule: never auto-commit.</p>
+    <nav class="toc">
+      <a href="#problems">The problems it solves <span class="n">01</span></a>
+      <a href="#shape">The shape <span class="n">02</span></a>
+      <a href="#improve">How it improves itself <span class="n">03</span></a>
+      <a href="#fit">Where it fits <span class="n">04</span></a>
+    </nav>
+  </header>
+
+  <div class="card-finding">
+    <h4>What's worth knowing up front</h4>
+    <p><strong>1.</strong> kss is built around <em>durable state files</em>, not chat memory. When you come back tomorrow, the state is on disk under <code>.kss/</code> — not in your head, not in a context window.</p>
+    <p><strong>2.</strong> The self-improvement loop is <em>opt-in</em>. You only invoke <code>skill-autopsy</code> when a skill misfires; nothing watches you in the background.</p>
+    <p><strong>3.</strong> No skill ever runs <code>git commit</code>. Every artifact is a file you can review, edit, or delete before any commit happens. Trust is earned by being legible.</p>
+  </div>
+
+  <section id="problems">
+    <div class="sec-head">
+      <span class="idx">01</span>
+      <h2>The problems it solves</h2>
+      <span class="count">3 pain points</span>
+    </div>
+    <p class="sec-intro">Solo dev with an AI agent has a specific failure mode: every session starts cold, the agent re-asks what you already decided, and the work-in-flight gets reasoned about from a fresh slate. Heavier frameworks address this with rituals and roles. kss addresses it with files.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4 class="muted">Problem 01</h4>
+        <h3>Cold-start every session</h3>
+        <p>You closed the laptop yesterday mid-thought. Today the agent has no idea what you were doing, why, or what's next. You spend the first 10 minutes re-explaining.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">→ <code>start-session</code> reads <code>STATE.md</code> + recent <code>LOG.md</code> entries and tells you exactly where you left off.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 02</h4>
+        <h3>Multiple work tracks, one head</h3>
+        <p>You have three half-finished initiatives. Without isolation, ideas bleed across. You commit to working on A, end up touching B, lose the thread on both.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">→ <code>topics</code> isolate work tracks. <code>milestones</code> scope finite chunks inside a topic. Only one is active at a time.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 03</h4>
+        <h3>Insights rot in chat history</h3>
+        <p>You learn something useful in session 12. By session 30, neither you nor the agent remembers it. You re-discover the same gotcha quarterly.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">→ <code>capture</code> parks ideas. <code>distill</code> promotes durable insights to <code>CANONICAL-KB.md</code> + domain terms to <code>VOCABULARY.md</code>.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 24px;">
+      <div class="card">
+        <h4 class="muted">Problem 04</h4>
+        <h3>Skills you can't fix</h3>
+        <p>Most agent frameworks ship rigid skills. When one consistently misfires, you have nowhere to put the feedback — so the same friction recurs forever.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">→ <code>skill-autopsy</code> turns a frustration into a report, then into a concrete diff against the offending <code>SKILL.md</code>.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 05</h4>
+        <h3>Risky exploration, expensive cleanup</h3>
+        <p>You want to test "what if". Branching feels heavy; commit feels premature. Without a parking spot, exploration leaks into the main work and pollutes the milestone.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">→ <code>spike</code> creates a throwaway folder under <code>.kss/spikes/</code> with one job: produce a verdict (keep / drop / promote).</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="shape">
+    <div class="sec-head">
+      <span class="idx">02</span>
+      <h2>The shape</h2>
+      <span class="count">11 skills</span>
+    </div>
+    <p class="sec-intro">Skills are organized in five layers. You only invoke what the situation demands; there's no orchestrator running them in sequence.</p>
+
+    <div class="grid-2">
+      <div class="card card-soft">
+        <h4>Setup <span class="pill pill-oat">2 skills</span></h4>
+        <p>One-time bootstrap per project.</p>
+        <p style="margin-top: 8px;"><code>scaffold-project</code> · <code>map-codebase</code></p>
+      </div>
+      <div class="card card-soft">
+        <h4>Lifecycle <span class="pill pill-oat">3 skills</span></h4>
+        <p>Topic + milestone management.</p>
+        <p style="margin-top: 8px;"><code>new-topic</code> · <code>plan-milestone</code> · <code>complete-milestone</code></p>
+      </div>
+      <div class="card card-soft">
+        <h4>Session <span class="pill pill-oat">2 skills</span></h4>
+        <p>Bookend every coding session.</p>
+        <p style="margin-top: 8px;"><code>start-session</code> · <code>wrap-up</code></p>
+      </div>
+      <div class="card card-soft">
+        <h4>Knowledge <span class="pill pill-oat">2 skills</span></h4>
+        <p>Park ideas, distill durable insights.</p>
+        <p style="margin-top: 8px;"><code>capture</code> · <code>distill</code></p>
+      </div>
+      <div class="card card-soft">
+        <h4>Exploration <span class="pill pill-oat">1 skill</span></h4>
+        <p>Throwaway "what if" experiments with a verdict.</p>
+        <p style="margin-top: 8px;"><code>spike</code></p>
+      </div>
+      <div class="card card-soft">
+        <h4>Meta <span class="pill pill-oat">1 skill</span></h4>
+        <p>Self-improvement loop. Optional.</p>
+        <p style="margin-top: 8px;"><code>skill-autopsy</code></p>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top: 32px;">"Two-level state. <code style="font-style: normal;">.kss/STATE.md</code> is the pointer. The active topic's <code style="font-style: normal;">STATE.md</code> is the content."</div>
+  </section>
+
+  <section id="improve">
+    <div class="sec-head">
+      <span class="idx">03</span>
+      <h2>How it improves itself</h2>
+      <span class="count">opt-in loop</span>
+    </div>
+    <p class="sec-intro"><code>skill-autopsy</code> is the only entry point that captures friction with a skill and proposes a fix. It runs only when you call it — never automatically. The design treats reports as personal artifacts, never as plugin source.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4 class="muted">Step 1 · Capture</h4>
+        <h3>One frustration becomes one report</h3>
+        <p>You invoke <code>skill-autopsy &lt;skill&gt;</code> right after a misfire. A short interview captures: what you asked, what the skill did, why it was off. The report is appended (newest-on-top) to <code>~/kss-skill-reports/&lt;skill&gt;.md</code>.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;">Reports live in your home folder. Never inside the plugin source — even forkers don't accidentally commit personal frustrations upstream.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Step 2 · Accumulate, with caps</h4>
+        <h3>Patterns need samples</h3>
+        <p>One report is a complaint. Three reports might be a pattern. The autopsy stays silent through the first three; at four it offers to consolidate; past five it nudges harder. The cap exists so the file doesn't rot into a graveyard.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Step 3 · Propose, never invent</h4>
+        <h3>Concrete diff or "nothing yet"</h3>
+        <p>Consolidate mode reads the reports and looks for recurring root causes. If there's signal — three reports all complain about the same missing preflight — it proposes a diff to that <code>SKILL.md</code>. If reports are vague, it says so honestly and suggests waiting.</p>
+        <p class="muted" style="font-size: 13px; margin-top: 12px;"><strong>Never fabricates.</strong> "Nothing to change yet" is a valid outcome.</p>
+      </div>
+    </div>
+
+    <div class="card card-emph" style="margin-top: 24px;">
+      <h3>Branch on source availability</h3>
+      <div class="grid-2" style="margin-top: 12px;">
+        <div>
+          <p><span class="pill pill-clay">forker / contributor</span> If <code>~/.kss-source</code> points at a writable clone, the diff is <em>applied</em> to that clone's <code>SKILL.md</code>. Reports are cleared. The skill prints the exact <code>git -C</code> commands to commit — but never runs them.</p>
+        </div>
+        <div>
+          <p><span class="pill pill-sky">plain installer</span> If no source path is set, the diff is <em>printed</em> for manual handling. Open a GitHub issue with it, fork later and apply it, or adapt your usage. Reports can be cleared either way.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="fit">
+    <div class="sec-head">
+      <span class="idx">04</span>
+      <h2>Where it fits</h2>
+      <span class="count">positioning</span>
+    </div>
+    <p class="sec-intro">kss is opinionated about what it isn't. It is not a startup-team simulator and not a deploy pipeline.</p>
+
+    <div class="compare">
+      <div>
+        <h4 class="muted">Heavyweight frameworks</h4>
+        <h3>gstack-style</h3>
+        <ul>
+          <li>~45 skills modeling a startup team (CEO, Eng, Designer, QA, SRE)</li>
+          <li>Multi-step pipelines that ship code: <code>/ship</code>, <code>/land-and-deploy</code>, <code>/canary</code></li>
+          <li>Optimized for ~10K LOC/week throughput</li>
+          <li>Auto-commits, auto-deploys, auto-monitors</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="muted">kss</h4>
+        <h3>This framework</h3>
+        <ul>
+          <li>11 skills; no roles, no orchestration</li>
+          <li>State lives in plain markdown files under <code>.kss/</code></li>
+          <li>Optimized for <em>continuity</em> across many short sessions</li>
+          <li>Never auto-commits. Every artifact is a file you review</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="margin-top: 24px;">Inspired by <a href="https://github.com/gsd-build/get-shit-done">GSD (Get Shit Done)</a> — kss borrows the lifecycle ideas (topic isolation, codebase map, trigger-conditioned seeds) without the multi-agent ceremony. The "shit" pun is on the nose: keep the structure, drop the theatre.</p>
+
+    <p class="muted" style="margin-top: 16px;">Want the detailed tour — every skill, the decision diagram, file layouts, conventions? Open <code>kss-reference.html</code>.</p>
+  </section>
+
+  <footer>
+    <span class="k">"Trust is earned by being legible."</span>
+    <span>kss-plugins · overview</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

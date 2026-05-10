@@ -1,0 +1,8 @@
+{
+  "name": "kss",
+  "description": "Keep Shit Simple — solo dev framework with reduced ceremony and high customization. Session-driven workflow with topics, milestones, spikes, and an optional self-improvement loop.",
+  "version": "0.1.0",
+  "author": {
+    "name": "kss-plugins maintainers"
+  }
+}
