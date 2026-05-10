@@ -275,6 +275,93 @@
     margin-bottom: 6px;
   }
 
+  /* ── details/summary expander (collapsible source) ─── */
+  details.snippet { margin: 8px 0; }
+  details.snippet summary {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    list-style: none;
+    padding: 6px 0;
+  }
+  details.snippet summary::-webkit-details-marker { display: none; }
+  details.snippet summary::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform 120ms;
+    margin-right: 8px;
+  }
+  details.snippet[open] summary::before { transform: rotate(90deg); }
+
+  /* ── code block + manual syntax highlighting ────────── */
+  pre.code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    background: var(--g100);
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    color: var(--g700);
+  }
+  pre.code .kw  { color: var(--clay); }
+  pre.code .fn  { color: var(--sky); }
+  pre.code .str { color: var(--olive); }
+  pre.code .cm,
+  pre.code .dim { color: var(--g500); font-style: italic; }
+
+  /* ── two-column page with sticky aside ──────────────── */
+  .page-with-aside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 40px;
+  }
+  .page-with-aside aside.sticky {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+  @media (max-width: 960px) {
+    .page-with-aside { grid-template-columns: 1fr; }
+  }
+
+  /* ── step + numbered badge (walkthroughs) ───────────── */
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .step .badge {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--clay); color: var(--paper);
+    display: grid; place-content: center;
+    font-family: var(--mono); font-size: 13px;
+    font-weight: 600;
+  }
+  .step.hot .badge { background: var(--clay-d); }
+  .step-loc {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--g500);
+    margin-bottom: 6px;
+  }
+  .step-loc .range { color: var(--g300); }
+
+  /* ── dim utility (filtered-out items in editors/research) */
+  .dim { opacity: 0.3; transition: opacity 120ms; }
+
+  /* ── inline SVG diagrams (paired with <defs><marker>) ─ */
+  .flow .box { fill: var(--paper); stroke: var(--g300); stroke-width: 1.5; }
+  .flow .box.hot { stroke: var(--clay); stroke-width: 2; }
+  .flow text { font-family: var(--sans); font-size: 14px; fill: var(--slate); }
+  .flow text.sub { font-family: var(--mono); font-size: 11px; fill: var(--g500); }
+  .flow .arrow, .flow .edge { stroke: var(--g500); stroke-width: 1.5; fill: none; }
+  .flow .edge.yes { stroke: var(--olive); }
+  .flow .edge.no  { stroke: var(--clay-d); }
+
   /* ── footer ─────────────────────────────────────────── */
   footer {
     margin-top: 80px;

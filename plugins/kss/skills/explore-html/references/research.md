@@ -31,6 +31,47 @@ The user reads it once, top to bottom, and walks away knowing the surface area b
 - **Missing the "so what".** Every Research page should end with "given what you just saw, here are the choices." Without that, the user is left holding a fact-list with no decision attached.
 - **Over-interactive.** Research pages don't always need toggles. Sometimes a static well-organized table beats a sliders-and-knobs UI. Match interactivity to whether the user actually has a parameter to vary.
 
+## Pattern: concept explainer with live SVG
+
+When the topic is an algorithm or mechanism the user has to *internalize*, the best artifact is an interactive SVG the user can poke at. Slider input → recompute geometry → repaint. The repaint loop is ~20 lines of vanilla JS; no React.
+
+```html
+<div class="controls">
+  <label>Nodes: <span id="nVal">5</span>
+    <input id="nSlider" type="range" min="2" max="12" value="5"/>
+  </label>
+  <label>Keys: <span id="kVal">16</span>
+    <input id="kSlider" type="range" min="4" max="64" value="16"/>
+  </label>
+</div>
+<svg id="ring" viewBox="0 0 260 260"><!-- repainted by render() --></svg>
+<div id="readout"></div>
+
+<script>
+// Deterministic hash so the demo is STABLE — same N produces the same nodes every time
+function h(s) {
+  let x = 2166136261;
+  for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = (x * 16777619) >>> 0; }
+  return x / 4294967296;
+}
+
+function render() {
+  const n = +document.getElementById('nSlider').value;
+  const k = +document.getElementById('kSlider').value;
+  // ...compute node/key positions on the ring using h(`node-${i}`)...
+  document.getElementById('ring').innerHTML = /* generated SVG */ '';
+}
+
+document.getElementById('nSlider').addEventListener('input', render);
+document.getElementById('kSlider').addEventListener('input', render);
+render();
+</script>
+```
+
+The **deterministic hash trick** matters: don't use `Math.random()` for placement, because the user will move the slider and watch the whole picture shuffle in ways unrelated to their input. A stable hash means the visible change is *only* the change they made.
+
+When to reach for this pattern: algorithms (consistent hashing, rate limiting, retry backoff), data structures (B-trees, skip lists), or any concept with a *small number of named parameters* the user can vary.
+
 ## Data capture
 
 Almost always wants real data. See `real-data.md`.

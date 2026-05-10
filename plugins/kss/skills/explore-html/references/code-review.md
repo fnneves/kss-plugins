@@ -25,6 +25,77 @@ The reader can navigate the change without opening the IDE.
 - **Module map** as a tree or nested boxes. Show the dependency edges your change touches. Don't try to show the whole codebase.
 - **Quote-and-respond pattern** for reviewer concerns: "Concern: X. Response: Y." in cards.
 
+## Pattern: code walkthrough with collapsible source + sticky aside
+
+For "trace this through the codebase" requests, the strongest layout is:
+
+- **Main column** — numbered step cards. Each step names the file:line, gives a paragraph of context, and has a `<details>` block to "show source".
+- **Right aside** (`position: sticky`) — gotchas / invariants / things-to-remember that stay visible as the user scrolls through steps.
+- **One small inline script** — make `<details>` mutually exclusive so opening step 3 closes step 1 (keeps the walkthrough scannable).
+
+```html
+<div class="page-with-aside">
+  <main>
+    <h2>Callstack walkthrough</h2>
+
+    <div class="step">
+      <div class="badge">3</div>
+      <div class="step-body">
+        <div class="step-loc">src/middleware/auth.ts<span class="range"> :14-31</span></div>
+        <p>This is the trust boundary. <code>verifyToken</code> reads the cookie,
+           resolves the session, and populates <code>req.ctx.session</code>.</p>
+        <details class="snippet">
+          <summary>show source</summary>
+          <pre class="code"><span class="dim">// src/middleware/auth.ts</span>
+<span class="kw">export async function</span> verifyToken(req, res, next) {
+  <span class="kw">const</span> raw = req.signedCookies[<span class="str">'fw_sid'</span>];
+  <span class="kw">if</span> (!raw) <span class="kw">return</span> res.status(401).end();
+  // ...
+}</pre>
+        </details>
+      </div>
+    </div>
+    <!-- more steps... -->
+  </main>
+
+  <aside class="sticky gotchas">
+    <h3>Gotchas</h3>
+    <ul>
+      <li>The LRU in <code>SessionStore</code> is per-process — revoking only clears one worker.</li>
+      <li><code>expiresAt</code> is <code>timestamptz</code>; don't refactor to raw string.</li>
+    </ul>
+  </aside>
+</div>
+
+<script>
+  // Only one snippet open at a time
+  const snippets = document.querySelectorAll('details.snippet');
+  snippets.forEach(d => {
+    d.addEventListener('toggle', () => {
+      if (!d.open) return;
+      snippets.forEach(o => { if (o !== d) o.open = false; });
+    });
+  });
+</script>
+```
+
+The `.page-with-aside`, `.step`, `.badge`, `details.snippet`, and `pre.code` styles all live in `assets/template.html` — lift them, don't redefine.
+
+## Pattern: manual syntax highlighting
+
+Skip Prism/highlight.js. Wrap keywords, strings, and comments in three classes:
+
+```html
+<pre class="code"><span class="dim">// comment</span>
+<span class="kw">export async function</span> verifyToken(req, res, next) {
+  <span class="kw">const</span> raw = req.signedCookies[<span class="str">'fw_sid'</span>];
+}</pre>
+```
+
+You can highlight *semantically* this way ("this identifier matters") rather than tokenwise ("every keyword in the file"). Cheaper and clearer than a library — and works in offline-safe persistent artifacts.
+
+A fourth class — `.fn` — is available in `assets/template.html` for function-call sites and identifier emphasis (rendered in `--sky`). Use it when the code's structure is *about* which functions are called (most code walkthroughs); skip it when keyword/string/comment is enough.
+
 ## Common pitfalls
 
 - **Recreating GitHub.** The user already has GitHub. The HTML page should add what GitHub doesn't — the spatial shape, the why, the cross-file logic.
