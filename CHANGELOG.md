@@ -8,6 +8,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each pl
 
 ## kss
 
+### [0.2.0] - 2026-05-11
+
+**Skills added:**
+- `explore-html` — single-file interactive HTML artifact builder (Utilities layer). Patterns: side-by-side comparison cards, code comparison (vertical stack), concept explainers with live SVG, status reports with hand-drawn bar charts, incident timelines, code walkthroughs with collapsible source, annotated PRs/diffs, scroll-snap slide decks, annotated flowcharts with detail panel, SVG figure sheets, kanban-style triage editors with copy-as-markdown export. Triggers on phrases like "a report", "a diagram", "diagrams", "slides", "a deck", "kanban", "triage board", "code approaches", "implementation options", or explicit HTML requests. Always confirms format and destination path before drafting. Bundled with `references/inspiration.md` — a curated index of Thariq's example pages, used for discovery and alternatives.
+
+**Skills reclassified:**
+- `spike` moved from Exploration layer to Session layer. Exploration layer removed (was a 1-skill layer). Spike fires mid-session when an idea needs testing before commitment, which is the same lifecycle moment as start-session / wrap-up.
+
+**Layers:** Setup (2) · Lifecycle (3) · Session (3) · Knowledge (2) · Meta (1) · Utilities (1). Total 12 skills.
+
 ### [0.1.0] - 2026-05-10
 
 Initial release.

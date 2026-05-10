@@ -18,11 +18,12 @@ All state lives under `.kss/` at the project root.
 | `/kss:plan-milestone` | Lifecycle | Scope + plan a milestone within the active topic. |
 | `/kss:complete-milestone` | Lifecycle | Close active milestone. With `--archive-topic`, archives whole topic. |
 | `/kss:start-session` | Session | Load context for active topic + milestone. Run at session start. |
+| `/kss:spike` | Session | Throwaway exploration with verdict-driven outcome. Fires mid-session when an idea needs testing before commitment. |
 | `/kss:wrap-up` | Session | Append LOG entry, update STATE, optionally write a note. Run at session end. |
 | `/kss:capture` | Knowledge | Drop a seed (with mandatory trigger), idea, or scratch note. |
 | `/kss:distill` | Knowledge | Extract durable insights from LOG + notes into CANONICAL-KB. Surfaces vocabulary candidates for VOCABULARY.md. |
-| `/kss:spike` | Exploration | Throwaway exploration with verdict-driven outcome. |
 | `/kss:skill-autopsy` | Meta | Log a short report when a skill underperformed, or analyze accumulated reports to propose SKILL.md improvements. |
+| `/kss:explore-html` | Utilities | Build a single-file interactive HTML page for exploration, comparison, reports, diagrams, slide decks, or drag-and-drop editors. Confirms format (HTML vs markdown) and destination path before drafting. |
 
 ## Which skill when
 
@@ -52,6 +53,7 @@ flowchart TD
     Work --> W4["A skill misfired<br/>→ /kss:skill-autopsy<br/><i>postmortem + propose SKILL.md fix</i>"]
     Work --> W5["Milestone shipped<br/>→ /kss:complete-milestone<br/><i>close milestone, write SUMMARY.md</i>"]
     Work --> W6["Ending session<br/>→ /kss:wrap-up<br/><i>append LOG entry + update STATE</i>"]
+    Work --> W7["Need a visual/interactive artifact<br/>→ /kss:explore-html<br/><i>HTML page: reports, diagrams, slides, side-by-side, kanban</i>"]
 ```
 
 Edge cases not in the diagram: rerun `map-codebase` after a major refactor, `complete-milestone --archive-topic` to archive the whole topic, and `skill-autopsy --consolidate` to analyze accumulated reports.
@@ -66,6 +68,7 @@ per session:         /kss:start-session → (work) → /kss:wrap-up
                                                      ↑
                               /kss:capture (anytime), /kss:distill (periodically)
                               /kss:spike (when exploring)
+                              /kss:explore-html (when an HTML artifact would beat markdown)
                               /kss:skill-autopsy <skill> (after a frustration)
 ```
 
