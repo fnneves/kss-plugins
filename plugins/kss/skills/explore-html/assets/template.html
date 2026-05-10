@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  /* ============================================================
+     explore-html template — editorial-paper design language
+     Adapted from ThariqS/html-effectiveness. Light, warm, three-font.
+     Lift these primitives; do not preserve as-is.
+     ============================================================ */
+  :root {
+    --ivory:    #FAF9F5;
+    --paper:    #FFFFFF;
+    --slate:    #141413;
+    --clay:     #D97757;       /* signature accent (italic emphasis, indices, links) */
+    --clay-d:   #B85C3E;
+    --oat:      #E3DACC;       /* secondary accent (hover fills, soft chips) */
+    --olive:    #788C5D;       /* tertiary accent */
+    --sky:      #6A8CAF;       /* tertiary accent */
+    --g100:     #F0EEE6;
+    --g200:     #E6E3DA;
+    --g300:     #D1CFC5;       /* hairline borders */
+    --g500:     #87867F;       /* muted text */
+    --g700:     #3D3D3A;       /* body text */
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 32px 120px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  /* ── typography ─────────────────────────────────────── */
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(34px, 4.4vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    color: var(--slate);
+    margin-bottom: 14px;
+    max-width: 22ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--slate);
+    letter-spacing: -0.012em;
+    margin: 0 0 8px;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    letter-spacing: -0.008em;
+    margin: 0 0 8px;
+  }
+  h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin: 0 0 8px;
+  }
+  p { margin: 0 0 10px; max-width: 68ch; }
+  .lead {
+    font-size: 16.5px;
+    color: var(--g700);
+    margin-bottom: 16px;
+    max-width: 64ch;
+  }
+  .muted { color: var(--g500); }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  /* eyebrow — small uppercase mono above a heading */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 24px; height: 1.5px;
+    background: var(--clay);
+  }
+
+  /* ── code & inline marks ────────────────────────────── */
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--g100);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+  .term { border-bottom: 1.5px dotted var(--clay); color: var(--slate); }
+
+  /* ── layout primitives ──────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 1000px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .card-tight { padding: 16px 18px; }
+  .card-soft { background: var(--g100); border-color: var(--g200); }
+  .card-emph { border-color: var(--slate); box-shadow: 0 12px 32px rgba(20,20,19,.08); }
+
+  /* ── section heads (numbered editorial sections) ────── */
+  section { margin-top: 56px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .sec-head .idx {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--clay);
+    font-weight: 600;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .sec-head .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--g500);
+    background: var(--g100);
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+  .sec-intro {
+    font-size: 14.5px;
+    color: var(--g700);
+    margin: 0 0 24px 48px;
+    max-width: 68ch;
+  }
+
+  /* ── pills (chips, tags, status indicators) ─────────── */
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--g100);
+    color: var(--g700);
+    border: 1px solid var(--g200);
+    vertical-align: middle;
+  }
+  .pill-clay { background: rgba(217,119,87,0.12); color: var(--clay-d); border-color: rgba(217,119,87,0.25); }
+  .pill-olive { background: rgba(120,140,93,0.14); color: var(--olive); border-color: rgba(120,140,93,0.25); }
+  .pill-sky { background: rgba(106,140,175,0.14); color: var(--sky); border-color: rgba(106,140,175,0.25); }
+  .pill-oat { background: var(--oat); color: var(--slate); border-color: transparent; }
+  .pill-slate { background: var(--slate); color: var(--ivory); border-color: transparent; }
+
+  /* ── pill TOC nav ──────────────────────────────────── */
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0 32px;
+  }
+  nav.toc a {
+    font-size: 12.5px;
+    padding: 7px 14px;
+    border: 1.5px solid var(--g300);
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--g700);
+    background: var(--paper);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: border-color 120ms, color 120ms;
+  }
+  nav.toc a .n {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--g500);
+  }
+  nav.toc a:hover { border-color: var(--slate); color: var(--slate); }
+  nav.toc a:hover .n { color: var(--clay); }
+  nav.toc a.is-active {
+    border-color: var(--slate);
+    color: var(--slate);
+    background: var(--oat);
+  }
+
+  /* ── tables ─────────────────────────────────────────── */
+  table.fields { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.fields th, table.fields td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--g200);
+    vertical-align: top;
+  }
+  table.fields th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--g500);
+    font-weight: 600;
+    background: var(--g100);
+    border-bottom-color: var(--g300);
+  }
+  table.fields td:first-child { font-family: var(--mono); white-space: nowrap; color: var(--slate); }
+  table.fields td.value { font-family: var(--mono); color: var(--g500); word-break: break-word; }
+  table.fields td.note { color: var(--g700); font-size: 13px; }
+
+  /* ── buttons & toggles ──────────────────────────────── */
+  button, .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--g700);
+    border: 1.5px solid var(--g300);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 120ms;
+  }
+  button:hover, .btn:hover { border-color: var(--slate); color: var(--slate); }
+  button.is-on, .btn.is-on { background: var(--oat); border-color: var(--slate); color: var(--slate); }
+  button.is-clay, .btn.is-clay { background: var(--clay); border-color: var(--clay); color: var(--paper); }
+
+  /* ── inputs ─────────────────────────────────────────── */
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--paper);
+    color: var(--slate);
+    border: 1.5px solid var(--g300);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--slate);
+  }
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--g500);
+    margin-bottom: 6px;
+  }
+
+  /* ── footer ─────────────────────────────────────────── */
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1.5px solid var(--g300);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--g500);
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header style="margin-bottom: 24px;">
+    <div class="eyebrow">{{EYEBROW — e.g. "Phase 1.3 design exploration"}}</div>
+    <h1>{{TITLE_WITH_ITALIC_EMPHASIS — use <em>for the key word</em>}}</h1>
+    <p class="lead">{{ONE_TO_TWO_SENTENCE_THESIS}}</p>
+    <nav class="toc">
+      <!-- pill nav (anchors or tabs) -->
+      <a href="#a">First section <span class="n">01</span></a>
+      <a href="#b">Second section <span class="n">02</span></a>
+    </nav>
+  </header>
+
+  <section id="a">
+    <div class="sec-head">
+      <span class="idx">01</span>
+      <h2>First section</h2>
+      <span class="count">3 items</span>
+    </div>
+    <p class="sec-intro">A one-paragraph framing. Tells the reader what this section delivers, why it's here, and what they'll be able to do after reading it.</p>
+    <div class="grid-3">
+      <div class="card">
+        <h3>Card title</h3>
+        <p>Content.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="k">{{closing_italic_remark}}</span>
+    <span>{{timestamp_or_source_note}}</span>
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     DATA BOOTSTRAP — see references/real-data.md
+     ============================================================ -->
+<script>
+  // INLINE pattern (small datasets):
+  const DATA = { /* ... */ };
+  // SIDECAR pattern (large datasets):
+  // <script src="snapshot.js"></script>  defines window.SNAPSHOT
+</script>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+// pill-toc tab switching, toggle wiring, recompute() — define here
+</script>
+
+</body>
+</html>
