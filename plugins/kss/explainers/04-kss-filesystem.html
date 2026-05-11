@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The .kss/ file system — kss explainer</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 64px 32px 120px;
+  }
+  .wrap { max-width: 1140px; margin: 0 auto; }
+
+  /* ── header ───────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 4.6vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    color: var(--slate);
+    margin-bottom: 14px;
+    max-width: 22ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  p.lead {
+    font-size: 17.5px;
+    color: var(--g700);
+    max-width: none;
+    margin-bottom: 8px;
+    text-align: justify;
+  }
+  p { margin: 0 0 12px; max-width: 64ch; }
+  .muted { color: var(--g500); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--g100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+  section { margin-top: 48px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--slate);
+    margin-bottom: 8px;
+    letter-spacing: -0.012em;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+
+  /* ── front callout: 3 surprises ───────────────────────── */
+  .findings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+  }
+  @media (max-width: 880px) {
+    .findings { grid-template-columns: 1fr; }
+  }
+  .finding {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-left: 4px solid var(--clay);
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+  .finding .f-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clay);
+    margin-bottom: 8px;
+  }
+  .finding h3 {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+  .finding p {
+    font-size: 13.5px;
+    color: var(--g700);
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* ── tree visualization ───────────────────────────────── */
+  .tree-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+  .tree-card .t-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin-bottom: 14px;
+  }
+  .tree {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .tree-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: background 120ms;
+  }
+  .tree-row:hover { background: var(--g100); }
+  .tree-path {
+    color: var(--slate);
+    white-space: pre;
+  }
+  .tree-row.dir .tree-path { color: var(--clay); }
+  .tree-row.root .tree-path { font-weight: 600; color: var(--slate); }
+  .tree-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--g500);
+  }
+
+  /* ── pills (status indicators) ─────────────────────────── */
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--g100);
+    color: var(--g700);
+    border: 1px solid var(--g200);
+    white-space: nowrap;
+  }
+  .pill-sky      { background: rgba(106,140,175,0.14); color: var(--sky); border-color: rgba(106,140,175,0.25); }
+  .pill-oat      { background: var(--oat); color: var(--slate); border-color: transparent; }
+  .pill-clay     { background: rgba(217,119,87,0.14); color: var(--clay-d); border-color: rgba(217,119,87,0.25); }
+  .pill-olive    { background: rgba(120,140,93,0.14); color: var(--olive); border-color: rgba(120,140,93,0.25); }
+  .pill-rust     { background: rgba(176,74,63,0.12); color: var(--clay-d); border-color: rgba(176,74,63,0.3); }
+  .pill-slate    { background: var(--slate); color: var(--ivory); border-color: transparent; }
+  .pill-muted    { background: var(--g100); color: var(--g500); border-color: var(--g300); border-style: dashed; }
+
+  /* ── tab bar ──────────────────────────────────────────── */
+  .tab-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 28px 0 18px;
+    border-bottom: 1.5px solid var(--g300);
+    padding-bottom: 0;
+  }
+  .tab {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: transparent;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    color: var(--g500);
+    padding: 10px 18px;
+    cursor: pointer;
+    margin-bottom: -1.5px;
+    transition: all 140ms;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+  }
+  .tab:hover { color: var(--slate); }
+  .tab.is-active {
+    color: var(--slate);
+    border-bottom-color: var(--clay);
+    font-weight: 600;
+  }
+  .tab .tab-count {
+    color: var(--g500);
+    font-size: 10.5px;
+    margin-left: 6px;
+  }
+  .tab.is-active .tab-count { color: var(--clay); }
+
+  /* ── tab panels ───────────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.is-active { display: block; }
+  .panel-intro {
+    font-size: 14.5px;
+    color: var(--g700);
+    margin-bottom: 16px;
+    max-width: 70ch;
+  }
+
+  /* ── fields table ─────────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1.5px solid var(--g300);
+    border-radius: 10px;
+    background: var(--paper);
+  }
+  table.fields {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    min-width: 760px;
+    table-layout: fixed;
+  }
+  table.fields th, table.fields td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--g200);
+    vertical-align: top;
+    word-break: break-word;
+  }
+  /* column widths — 4-column layout, behavior is a pill stacked under the path */
+  table.fields th:nth-child(1), table.fields td:nth-child(1) { width: 24%; }  /* path + pill */
+  table.fields th:nth-child(2), table.fields td:nth-child(2) { width: 18%; }  /* written by */
+  table.fields th:nth-child(3), table.fields td:nth-child(3) { width: 18%; }  /* read by */
+  table.fields th:nth-child(4), table.fields td:nth-child(4) { width: 40%; }  /* notes */
+
+  table.fields tr:last-child td { border-bottom: none; }
+  table.fields th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    font-weight: 600;
+    background: var(--g100);
+    border-bottom: 1.5px solid var(--g300);
+    white-space: nowrap;
+  }
+  table.fields td.path {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--slate);
+    line-height: 1.45;
+  }
+  table.fields td.path .pill {
+    display: block;
+    width: fit-content;
+    margin-top: 8px;
+  }
+  table.fields td.skills {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g700);
+    line-height: 1.5;
+  }
+  table.fields td.notes {
+    color: var(--g700);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  table.fields tr:hover td { background: rgba(217,119,87,0.04); }
+
+  /* ── tooltip on hover for pills with data-tip ─────────── */
+  .pill[data-tip] {
+    cursor: help;
+    position: relative;
+  }
+  .pill[data-tip]::after,
+  .pill[data-tip]::before {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms;
+    position: absolute;
+    z-index: 50;
+  }
+  .pill[data-tip]::after {
+    content: attr(data-tip);
+    bottom: calc(100% + 10px);
+    left: 0;
+    background: var(--slate);
+    color: var(--ivory);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 9px 13px;
+    border-radius: 6px;
+    white-space: normal;
+    width: 260px;
+    text-align: left;
+    line-height: 1.55;
+    box-shadow: 0 4px 14px rgba(20,20,19,0.2);
+  }
+  .pill[data-tip]::before {
+    content: "";
+    bottom: calc(100% + 4px);
+    left: 20px;
+    border: 6px solid transparent;
+    border-top-color: var(--slate);
+  }
+  .pill[data-tip]:hover::after,
+  .pill[data-tip]:hover::before {
+    opacity: 1;
+  }
+
+  /* ── reference cards (external + conventions) ─────────── */
+  .ref-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 36px;
+  }
+  @media (max-width: 880px) {
+    .ref-section { grid-template-columns: 1fr; }
+  }
+  .ref-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 12px;
+    padding: 22px 26px;
+  }
+  .ref-card .r-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin-bottom: 12px;
+  }
+  .ref-card h3 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .ref-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ref-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--g200);
+    font-size: 13px;
+    color: var(--g700);
+    line-height: 1.55;
+  }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list li code {
+    font-size: 12px;
+    background: var(--g100);
+    padding: 2px 5px;
+  }
+  .ref-list li .note {
+    color: var(--g500);
+    font-size: 12.5px;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ── footer ──────────────────────────────────────────── */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1.5px solid var(--g300);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--g500);
+  }
+  footer .k {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--g700);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">kss explainer · 04 · the .kss/ file system</div>
+    <h1>Where <em>everything</em> lives.</h1>
+    <p class="lead">
+      kss state is plain markdown under <code>.kss/</code> at the project root. No database, no compiled state, no hidden caches — every artifact is a file you can grep, diff, and commit. This page surfaces who writes which file, who reads it, how it changes over time, and which design choices are worth knowing about before you start naming things.
+    </p>
+    <p class="muted">
+      The findings below capture the design choices most people don't notice on first read. The tabs that follow are the full surface — switch across <code>root</code> / <code>codebase</code> / <code>topics</code> / <code>spikes &amp; archive</code> to see every file.
+    </p>
+  </header>
+
+  <!-- ============================================================
+       Front callout — 3 design surprises
+       ============================================================ -->
+  <section>
+    <div class="findings">
+      <div class="finding">
+        <div class="f-label">Finding 01</div>
+        <h3>Presence of <code>SUMMARY.md</code> = shipped.</h3>
+        <p>No separate "status: shipped" flag. The filesystem itself encodes the state. A milestone folder with <code>PLAN.md</code> but no <code>SUMMARY.md</code> is active; once SUMMARY appears, it's shipped.</p>
+      </div>
+      <div class="finding">
+        <div class="f-label">Finding 02</div>
+        <h3>Two <code>STATE.md</code> files. Different jobs.</h3>
+        <p>Root <code>.kss/STATE.md</code> is a <strong>pointer</strong> — names which topic and milestone are active. Topic-level <code>STATE.md</code> is <strong>content</strong> — current focus and blockers. Same filename, opposite roles.</p>
+      </div>
+      <div class="finding">
+        <div class="f-label">Finding 03</div>
+        <h3><code>VOCABULARY.md</code> never gets overwritten.</h3>
+        <p>STACK / STRUCTURE / CONVENTIONS overwrite on every <code>map-codebase</code> rerun. VOCABULARY is the exception — append-only across runs, grown by <code>distill</code>. The shape changes; the language sticks.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Tree visualization
+       ============================================================ -->
+  <section>
+    <div class="tree-card">
+      <div class="t-label">.kss/ at a glance</div>
+      <div class="tree">
+        <div class="tree-row root">
+          <span class="tree-path">.kss/</span>
+        </div>
+        <div class="tree-row">
+          <span class="tree-path">├── PROJECT.md</span>
+          <span class="pill pill-oat">identity</span>
+        </div>
+        <div class="tree-row">
+          <span class="tree-path">├── STATE.md</span>
+          <span class="pill pill-sky">pointer</span>
+        </div>
+        <div class="tree-row">
+          <span class="tree-path">├── CANONICAL-KB.md</span>
+          <span class="pill pill-olive">append · cross-topic</span>
+        </div>
+        <div class="tree-row dir">
+          <span class="tree-path">├── codebase/</span>
+          <span class="tree-meta">4 files · STACK / STRUCTURE / CONVENTIONS / VOCABULARY</span>
+        </div>
+        <div class="tree-row dir">
+          <span class="tree-path">├── topics/</span>
+          <span class="tree-meta">one folder per topic · 5 state files + milestones/</span>
+        </div>
+        <div class="tree-row dir">
+          <span class="tree-path">├── spikes/</span>
+          <span class="tree-meta">date-prefixed folders · throwaway with verdict</span>
+        </div>
+        <div class="tree-row dir">
+          <span class="tree-path">└── archive/</span>
+          <span class="tree-meta">retired topics moved here on <code>--archive-topic</code></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Tab bar
+       ============================================================ -->
+  <section>
+    <div class="tab-bar" role="tablist">
+      <button class="tab is-active" data-target="tab-root" role="tab">project root <span class="tab-count">3</span></button>
+      <button class="tab" data-target="tab-codebase" role="tab">codebase <span class="tab-count">4</span></button>
+      <button class="tab" data-target="tab-topics" role="tab">topics <span class="tab-count">8</span></button>
+      <button class="tab" data-target="tab-spikes" role="tab">spikes &amp; archive <span class="tab-count">2</span></button>
+    </div>
+
+    <!-- ─── Tab 1: Project root ─── -->
+    <div class="tab-panel is-active" id="tab-root">
+      <p class="panel-intro">
+        Three files sit at the very root of <code>.kss/</code>. They name the project, point to the active work, and accumulate cross-topic knowledge over time.
+      </p>
+      <div class="table-wrap">
+        <table class="fields">
+          <thead>
+            <tr><th>Path</th><th>Written by</th><th>Read by</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="path">
+                .kss/PROJECT.md
+                <span class="pill pill-oat" data-tip="Durable description that rarely changes after the first write.">identity</span>
+              </td>
+              <td class="skills">scaffold-project</td>
+              <td class="skills">all skills</td>
+              <td class="notes">Durable project identity + topics index. Rarely edited after scaffold. YAML frontmatter + short prose section.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                .kss/STATE.md
+                <span class="pill pill-sky" data-tip="Tiny file that names what's currently active. Read often, written rarely.">pointer</span>
+              </td>
+              <td class="skills">new-topic · plan-milestone · complete-milestone</td>
+              <td class="skills">start-session</td>
+              <td class="notes">Project-level pointer — names the active topic slug and active milestone slug. Tiny file. Two-line frontmatter is the whole content.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                .kss/CANONICAL-KB.md
+                <span class="pill pill-olive" data-tip="Append-only across all topics in the project. Accumulates project-wide insights.">append · cross-topic</span>
+              </td>
+              <td class="skills">distill</td>
+              <td class="skills">all skills (implicit context)</td>
+              <td class="notes">Durable insights distilled from LOG / SEEDS / spike findings across all topics. Append-only. The closest thing to "what we've learned about this project."</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Tab 2: Codebase ─── -->
+    <div class="tab-panel" id="tab-codebase">
+      <p class="panel-intro">
+        Four files capture the shape and language of the codebase. Three overwrite on each <code>map-codebase</code> rerun (because the codebase changes); the fourth is append-only (because vocabulary sticks).
+      </p>
+      <div class="table-wrap">
+        <table class="fields">
+          <thead>
+            <tr><th>Path</th><th>Written by</th><th>Read by</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="path">
+                codebase/STACK.md
+                <span class="pill pill-clay" data-tip="Rewritten in full on each run of the producer skill.">overwrite</span>
+              </td>
+              <td class="skills">map-codebase</td>
+              <td class="skills">start-session · plan-milestone</td>
+              <td class="notes">Languages, frameworks, runtimes, package managers, key infra. Snapshot-style — rerun map-codebase to refresh.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                codebase/STRUCTURE.md
+                <span class="pill pill-clay" data-tip="Rewritten in full on each run of the producer skill.">overwrite</span>
+              </td>
+              <td class="skills">map-codebase</td>
+              <td class="skills">start-session · plan-milestone</td>
+              <td class="notes">Directory tree, module map, entry points, where the bodies are buried. Overwrites on rerun.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                codebase/CONVENTIONS.md
+                <span class="pill pill-clay" data-tip="Rewritten in full on each run of the producer skill.">overwrite</span>
+              </td>
+              <td class="skills">map-codebase</td>
+              <td class="skills">start-session · plan-milestone</td>
+              <td class="notes">Naming, formatting, idioms specific to this codebase. The "don't fight the style" reference.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                codebase/VOCABULARY.md
+                <span class="pill pill-olive" data-tip="Seeded by one skill, grown append-only by another. Survives reruns of the seeder.">append · seeded</span>
+              </td>
+              <td class="skills">map-codebase (seed) · distill (grow)</td>
+              <td class="skills">start-session · all skills</td>
+              <td class="notes">Domain terms with definitions. <strong>Append-only</strong> — survives map-codebase reruns. Seeded once, then grown by distill from session terminology.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Tab 3: Topics ─── -->
+    <div class="tab-panel" id="tab-topics">
+      <p class="panel-intro">
+        Every topic gets a folder under <code>.kss/topics/&lt;slug&gt;/</code>. Five state files at the topic root, plus a <code>milestones/</code> subdirectory for the finite chunks of work inside.
+      </p>
+      <div class="table-wrap">
+        <table class="fields">
+          <thead>
+            <tr><th>Path</th><th>Written by</th><th>Read by</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/TOPIC.md
+                <span class="pill pill-oat" data-tip="Durable description that rarely changes after the first write.">identity</span>
+              </td>
+              <td class="skills">new-topic</td>
+              <td class="skills">start-session · plan-milestone · complete-milestone</td>
+              <td class="notes">Topic identity, success bar, key decisions. Stable once set — only edit when scope genuinely changes.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/STATE.md
+                <span class="pill pill-clay" data-tip="Refreshed periodically — overwritten with current state.">content</span>
+              </td>
+              <td class="skills">wrap-up · start-session</td>
+              <td class="skills">start-session</td>
+              <td class="notes">Current focus + blockers for THIS topic (not the project). Overwritten on each wrap-up. Different role from root STATE.md despite the same name.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/LOG.md
+                <span class="pill pill-olive" data-tip="Append-only with newest entry at the top — recent context surfaces first on cold load.">append · newest-on-top</span>
+              </td>
+              <td class="skills">wrap-up</td>
+              <td class="skills">start-session · distill</td>
+              <td class="notes">Session-by-session entries. Terse — what shipped, what blocked, what's next. <strong>Newest entry at the top</strong> so cold-loading the page surfaces recent context first.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/SEEDS.md
+                <span class="pill pill-olive" data-tip="Only ever grows. New entries added, old ones never removed.">append</span>
+              </td>
+              <td class="skills">capture</td>
+              <td class="skills">distill</td>
+              <td class="notes">Parked items, each with a <strong>trigger condition</strong>. Seeds without triggers are refused by capture — items that can't fire on a condition just rot.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/MILESTONES.md
+                <span class="pill pill-olive" data-tip="Append-only with newest entry at the top — recent context surfaces first on cold load.">append · newest-on-top</span>
+              </td>
+              <td class="skills">complete-milestone</td>
+              <td class="skills">start-session</td>
+              <td class="notes">Shipped milestone summaries. Newest at the top. The "what shipped in this topic, in order" reference.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/milestones/&lt;v&gt;-&lt;slug&gt;/PLAN.md
+                <span class="pill pill-clay" data-tip="Refreshed periodically — overwritten with current state.">content</span>
+              </td>
+              <td class="skills">plan-milestone</td>
+              <td class="skills">start-session · complete-milestone</td>
+              <td class="notes">The plan for this specific milestone. Anchors the work — drift mid-execution is mitigated by re-reading this.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/milestones/&lt;v&gt;-&lt;slug&gt;/SUMMARY.md
+                <span class="pill pill-slate" data-tip="Presence or absence of the file is the signal. No status flag needed.">marker</span>
+              </td>
+              <td class="skills">complete-milestone</td>
+              <td class="skills">distill · MILESTONES.md author</td>
+              <td class="notes"><strong>Presence of this file is the signal.</strong> Folder with PLAN but no SUMMARY → active milestone. Folder with both → shipped. No flags, no metadata; just the filesystem.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                topics/&lt;slug&gt;/milestones/&lt;v&gt;-&lt;slug&gt;/note-YYYYMMDD-*.md
+                <span class="pill pill-oat" data-tip="Optional content file — written only when there's more to record than fits in LOG.md.">content (optional)</span>
+              </td>
+              <td class="skills">wrap-up (optional) · spike</td>
+              <td class="skills">start-session</td>
+              <td class="notes">Optional session notes. Date-prefixed for natural ordering. Written when wrap-up has more to record than fits in LOG.md.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Tab 4: Spikes & Archive ─── -->
+    <div class="tab-panel" id="tab-spikes">
+      <p class="panel-intro">
+        Spikes are throwaway exploration with verdicts; archive is where retired topics go. Both live outside the active topic tree so they don't pollute current work.
+      </p>
+      <div class="table-wrap">
+        <table class="fields">
+          <thead>
+            <tr><th>Path</th><th>Written by</th><th>Read by</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="path">
+                spikes/YYYYMMDD-&lt;slug&gt;/README.md
+                <span class="pill pill-clay" data-tip="Throwaway exploration ending in a keep / drop / promote verdict.">content · verdict</span>
+              </td>
+              <td class="skills">spike</td>
+              <td class="skills">distill · complete-milestone</td>
+              <td class="notes">Question, approach, findings, and a <strong>verdict</strong> (keep / drop / promote). Date-prefixed folder name. Throwaway by design — the verdict is what matters, not the artifact.</td>
+            </tr>
+            <tr>
+              <td class="path">
+                archive/&lt;topic-slug&gt;/
+                <span class="pill pill-muted" data-tip="Folder relocated here by --archive-topic. Outside the active workflow.">moved</span>
+              </td>
+              <td class="skills">complete-milestone <code>--archive-topic</code></td>
+              <td class="skills">(history reference only)</td>
+              <td class="notes">A retired topic's entire folder is moved here. Preserves shape (TOPIC.md, LOG.md, milestones, etc.). Not read by active skills — it's an audit trail.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Reference cards — external paths + conventions
+       ============================================================ -->
+  <section class="ref-section">
+    <div class="ref-card">
+      <div class="r-label">Related paths · outside .kss/</div>
+      <h3>Files kss uses, elsewhere.</h3>
+      <ul class="ref-list">
+        <li>
+          <code>~/kss-skill-reports/&lt;skill&gt;.md</code> <span class="pill pill-rust">personal</span>
+          <span class="note">Misfire reports written by <code>skill-autopsy</code>. Per-user, never committed to plugin source. Path is intentional — keeps your friction out of public artifacts.</span>
+        </li>
+        <li>
+          <code>~/.kss-source</code> <span class="pill pill-muted">optional</span>
+          <span class="note">Single-line file containing the path to your local clone of the marketplace. Only relevant if you fork to apply autopsy diffs locally. Plain installs ignore it.</span>
+        </li>
+        <li>
+          <code>/tmp/explorer-&lt;slug&gt;.html</code> <span class="pill pill-muted">ephemeral</span>
+          <span class="note">Throwaway HTML artifacts from <code>explore-html</code>. May pull from CDN. Don't expect them to persist.</span>
+        </li>
+        <li>
+          <code>.kss/topics/&lt;slug&gt;/explorers/*.html</code> <span class="pill pill-oat">optional</span>
+          <span class="note">Persistent HTML artifacts (if explore-html was asked to save under a topic). Offline-safe — vanilla or vendored libraries only.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ref-card">
+      <div class="r-label">Conventions · file-format rules</div>
+      <h3>Hold the shape together.</h3>
+      <ul class="ref-list">
+        <li>
+          <strong>YAML frontmatter</strong> on every state file.
+          <span class="note">Easy to grep, easy to parse, easy to diff.</span>
+        </li>
+        <li>
+          <strong>Newest-on-top</strong> in <code>LOG.md</code> and <code>MILESTONES.md</code>.
+          <span class="note">Cold-load shows recent context first. No scrolling to find "where am I."</span>
+        </li>
+        <li>
+          <strong>Slugs are kebab-case</strong>.
+          <span class="note"><code>auth-rewrite</code>, not <code>AuthRewrite</code> or <code>auth_rewrite</code>.</span>
+        </li>
+        <li>
+          <strong>Dates: ISO <code>YYYY-MM-DD</code></strong> in frontmatter; <code>YYYYMMDD</code> as folder/file prefixes.
+          <span class="note">Sortable both ways. Hyphens for prose, no hyphens for paths.</span>
+        </li>
+        <li>
+          <strong>Active vs. shipped</strong> milestone is marked by <code>SUMMARY.md</code> presence. No status flag.
+        </li>
+        <li>
+          <strong>Seeds require triggers</strong>. No exceptions.
+          <span class="note">Items without trigger conditions rot — capture refuses them.</span>
+        </li>
+        <li>
+          <strong>Never auto-commit</strong>. Skills modify files; you commit.
+          <span class="note">Trust is earned by being legible.</span>
+        </li>
+        <li>
+          <strong>Two-level state</strong>. Root <code>STATE.md</code> = pointer. Topic <code>STATE.md</code> = content.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span class="k">The filesystem is the state. No database, no surprises.</span>
+    <span>kss v0.2.0 · 17 file types · 4 surfaces</span>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('is-active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
+    t.classList.add('is-active');
+    document.getElementById(t.dataset.target).classList.add('is-active');
+  });
+});
+</script>
+</body>
+</html>

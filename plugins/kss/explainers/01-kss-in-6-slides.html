@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kss in 6 slides</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── slide base ──────────────────────────────────────── */
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    padding: 80px 64px;
+    display: grid;
+    place-content: center;
+  }
+  .slide-inner {
+    max-width: 980px;
+    width: 100%;
+  }
+  .slide.invert {
+    background: var(--slate);
+    color: var(--ivory);
+  }
+  .slide.invert .eyebrow { color: var(--oat); }
+  .slide.invert .eyebrow::before { background: var(--clay); }
+  .slide.invert h2 { color: var(--ivory); }
+  .slide.invert .muted { color: var(--g300); }
+  .slide.invert .step .badge { background: var(--clay); color: var(--ivory); }
+  .slide.invert .step-body { color: var(--oat); }
+  .slide.invert code {
+    background: rgba(255,255,255,0.08);
+    color: var(--ivory);
+  }
+
+  /* ── typography ──────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(48px, 6.4vw, 76px);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+    color: var(--slate);
+    margin-bottom: 18px;
+    max-width: 18ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(32px, 4.2vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -0.014em;
+    color: var(--slate);
+    margin-bottom: 24px;
+    max-width: 22ch;
+  }
+  h2 em { font-style: italic; color: var(--clay); }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 21px;
+    color: var(--slate);
+    margin-bottom: 6px;
+    letter-spacing: -0.006em;
+  }
+  p { margin: 0 0 14px; max-width: 64ch; font-size: 18px; }
+  p.lead {
+    font-size: 21px;
+    color: var(--g700);
+    margin-bottom: 8px;
+    max-width: 60ch;
+  }
+  p.dek {
+    font-size: 20px;
+    color: var(--g700);
+    margin-top: 12px;
+    max-width: 58ch;
+  }
+  .muted { color: var(--g500); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--g100);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+
+  /* ── slide 1 — title ─────────────────────────────────── */
+  .title-slide .slide-inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .ornament {
+    margin-bottom: 8px;
+  }
+  .title-meta {
+    margin-top: 36px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--g500);
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .title-meta .dot { color: var(--g300); }
+
+  /* ── slide 2 — problem bullets ───────────────────────── */
+  .problem-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 16px;
+  }
+  .problem-list .item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: baseline;
+  }
+  .problem-list .item .x {
+    font-family: var(--mono);
+    color: var(--clay-d);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .problem-list .item p {
+    font-size: 19px;
+    margin: 0;
+    max-width: 60ch;
+  }
+  .closing-line {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--clay);
+    margin-top: 36px;
+    max-width: 48ch;
+  }
+
+  /* ── slide 3 — three commitments cards ───────────────── */
+  .commitments {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .commitments .card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .commitments .card h3 {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .commitments .card h3 .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--clay);
+    font-weight: 600;
+  }
+  .commitments .card p {
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--g700);
+  }
+  @media (max-width: 980px) {
+    .commitments { grid-template-columns: 1fr; }
+  }
+
+  /* ── slide 4 — layer grid ────────────────────────────── */
+  .layer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .layer-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .layer-card .layer-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .layer-card h3 {
+    font-size: 18px;
+    margin: 0;
+  }
+  .layer-card .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--g500);
+    background: var(--g100);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .layer-card .skills {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--g700);
+    line-height: 1.7;
+  }
+  .layer-card .gloss {
+    font-size: 13.5px;
+    color: var(--g500);
+    margin-top: 10px;
+  }
+  .layer-card.accent { border-color: var(--clay); }
+  @media (max-width: 980px) {
+    .layer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .layer-grid { grid-template-columns: 1fr; }
+  }
+  .footnote {
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--g500);
+    font-style: italic;
+    max-width: 60ch;
+  }
+
+  /* ── slide 5 — loop steps ────────────────────────────── */
+  .loop-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 18px;
+    align-items: baseline;
+  }
+  .step .badge {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--clay); color: var(--ivory);
+    display: grid; place-content: center;
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+  }
+  .step-body {
+    font-size: 17px;
+    color: var(--oat);
+    line-height: 1.55;
+  }
+  .step-body strong { color: var(--ivory); }
+  .invert .closing-line {
+    color: var(--clay);
+    margin-top: 40px;
+  }
+
+  /* ── slide 6 — start ─────────────────────────────────── */
+  pre.start-cmds {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    background: var(--g100);
+    padding: 22px 26px;
+    border-radius: 10px;
+    color: var(--g700);
+    margin-top: 24px;
+    overflow-x: auto;
+    border: 1.5px solid var(--g200);
+  }
+  pre.start-cmds .cm { color: var(--g500); }
+  pre.start-cmds .cmd { color: var(--clay); }
+  .repo-link {
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--g500);
+  }
+  .repo-link a {
+    color: var(--clay);
+    text-decoration: none;
+    border-bottom: 1.5px dotted var(--oat);
+  }
+
+  /* ── slide counter ───────────────────────────────────── */
+  #counter {
+    position: fixed;
+    bottom: 20px; right: 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    background: var(--paper);
+    padding: 7px 14px;
+    border: 1.5px solid var(--g300);
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    z-index: 10;
+  }
+  /* counter contrast when over a dark slide — handled via JS class */
+  body.over-invert #counter {
+    background: var(--g700);
+    color: var(--oat);
+    border-color: var(--slate);
+  }
+  #hint {
+    position: fixed;
+    bottom: 22px; left: 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--g500);
+    z-index: 10;
+    opacity: 0.7;
+  }
+  body.over-invert #hint { color: var(--g300); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Slide 1 — Title
+     ============================================================ -->
+<section class="slide title-slide" id="s1">
+  <div class="slide-inner">
+    <svg class="ornament" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#D97757" stroke-width="2"/>
+      <circle cx="32" cy="32" r="16" fill="none" stroke="#788C5D" stroke-width="1.5"/>
+      <circle cx="32" cy="32" r="6"  fill="#D97757"/>
+    </svg>
+    <div class="eyebrow">A solo-dev framework for Claude Code</div>
+    <h1>kss — Keep Shit <em>Simple</em></h1>
+    <p class="dek">
+      Session-driven workflow with reduced ceremony. <strong>12 skills, 6 layers,</strong>
+      one rule: <em>never auto-commit</em>.
+    </p>
+    <div class="title-meta">
+      <span>v0.2.0</span>
+      <span class="dot">·</span>
+      <span>fnneves/kss-plugins</span>
+      <span class="dot">·</span>
+      <span>MIT</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Slide 2 — The problem
+     ============================================================ -->
+<section class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="eyebrow">Why another framework?</div>
+    <h2>Most agent frameworks have ceremony you don't need.</h2>
+    <p class="lead muted">Solo dev. One brain. The collaboration tax doesn't apply.</p>
+    <div class="problem-list">
+      <div class="item">
+        <span class="x">×</span>
+        <p><strong>Multi-agent orchestrators</strong> expect a team. You're not a team.</p>
+      </div>
+      <div class="item">
+        <span class="x">×</span>
+        <p><strong>Heavy state machines</strong> expect a PM. You're the PM and the IC.</p>
+      </div>
+      <div class="item">
+        <span class="x">×</span>
+        <p><strong>Generated docs</strong> expect compliance. The only auditor is future-you, in three weeks.</p>
+      </div>
+    </div>
+    <p class="closing-line">I wanted shit, just simpler.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     Slide 3 — Three commitments
+     ============================================================ -->
+<section class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="eyebrow">Three commitments</div>
+    <h2>File-based state. Markdown skills. <em>Never auto-commit.</em></h2>
+    <div class="commitments">
+      <div class="card">
+        <h3><span class="num">01</span>File-based state</h3>
+        <p>Everything lives under <code>.kss/</code> as plain markdown. Grep it. Diff it. Commit it. State survives the framework.</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">02</span>Markdown skills</h3>
+        <p>Every skill is one <code>SKILL.md</code>. Open it. Edit it. Fork the marketplace. No compiled code, no hidden rules.</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">03</span>Never auto-commit</h3>
+        <p>Skills modify files; <em>you</em> commit. Trust is earned by being legible — every change is reviewable before it lands.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Slide 4 — 12 skills by layer
+     ============================================================ -->
+<section class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="eyebrow">What's in the box</div>
+    <h2>12 skills across 6 layers.</h2>
+    <p class="lead muted">You only invoke what the situation demands. There's no orchestrator running them in sequence.</p>
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-head"><h3>Setup</h3><span class="count">2</span></div>
+        <div class="skills">scaffold-project<br>map-codebase</div>
+        <div class="gloss">Bootstrap once per project; refresh after major refactors.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Lifecycle</h3><span class="count">3</span></div>
+        <div class="skills">new-topic<br>plan-milestone<br>complete-milestone</div>
+        <div class="gloss">Topics isolate work tracks; milestones scope finite chunks inside.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Session</h3><span class="count">3</span></div>
+        <div class="skills">start-session<br>spike<br>wrap-up</div>
+        <div class="gloss">Bookend each work session; spike when an idea needs testing first.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Knowledge</h3><span class="count">2</span></div>
+        <div class="skills">capture<br>distill</div>
+        <div class="gloss">Park ideas with triggers; promote durable insights to the canonical KB.</div>
+      </div>
+      <div class="layer-card accent">
+        <div class="layer-head"><h3>Meta</h3><span class="count">1</span></div>
+        <div class="skills">skill-autopsy</div>
+        <div class="gloss">The self-improvement loop — fix skills that misfire. See next slide.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Utilities</h3><span class="count">1</span></div>
+        <div class="skills">explore-html</div>
+        <div class="gloss">On-demand HTML artifacts (this slide deck included).</div>
+      </div>
+    </div>
+    <p class="footnote">No skill ever runs <code>git commit</code>. Every artifact is a file you review before any commit happens.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     Slide 5 — The self-improvement loop (INVERTED)
+     ============================================================ -->
+<section class="slide invert" id="s5">
+  <div class="slide-inner">
+    <div class="eyebrow">The distinctive part</div>
+    <h2>When a skill misfires, <em>you fix it</em>.</h2>
+    <p class="lead muted">
+      Most agent frameworks ship rigid skills. When one consistently misfires, the friction recurs forever.
+      kss treats your frustration as the input to the next iteration of the skill.
+    </p>
+    <div class="loop-steps">
+      <div class="step">
+        <div class="badge">1</div>
+        <div class="step-body">
+          A skill underperforms → <strong>/kss:skill-autopsy &lt;name&gt;</strong>. It interviews you and appends a short report at <code>~/kss-skill-reports/&lt;skill&gt;.md</code>.
+        </div>
+      </div>
+      <div class="step">
+        <div class="badge">2</div>
+        <div class="step-body">
+          Reports accumulate as you use the skill. Past <strong>4 reports</strong>, autopsy offers to consolidate.
+        </div>
+      </div>
+      <div class="step">
+        <div class="badge">3</div>
+        <div class="step-body">
+          Consolidate mode reads all reports, looks for recurring root causes, and <strong>proposes a concrete diff</strong> against the skill's SKILL.md. If reports share no pattern, it says so honestly instead of inventing fixes.
+        </div>
+      </div>
+      <div class="step">
+        <div class="badge">4</div>
+        <div class="step-body">
+          If <code>~/.kss-source</code> points to your fork → diff is <strong>applied</strong> + reports cleared. Otherwise → diff is <strong>printed</strong> for you to handle manually. You commit and push on your own time.
+        </div>
+      </div>
+    </div>
+    <p class="closing-line">The framework is the friction you remember to fix.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     Slide 6 — How to start
+     ============================================================ -->
+<section class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="eyebrow">If this looks useful</div>
+    <h2>Install + first commands.</h2>
+    <p class="lead muted">Inside Claude Code. Three lines to install, five to scaffold your first project.</p>
+    <pre class="start-cmds"><span class="cm"># add the marketplace + install</span>
+<span class="cmd">/plugin marketplace add fnneves/kss-plugins</span>
+<span class="cmd">/plugin install kss@kss-plugins</span>
+
+<span class="cm"># your first project</span>
+<span class="cmd">/kss:scaffold-project</span>     <span class="cm"># once per project</span>
+<span class="cmd">/kss:map-codebase</span>         <span class="cm"># once per major refactor</span>
+<span class="cmd">/kss:new-topic</span>            <span class="cm"># when starting unrelated work</span>
+<span class="cmd">/kss:plan-milestone</span>       <span class="cm"># when scoping a chunk</span>
+<span class="cmd">/kss:start-session</span>        <span class="cm"># at session start</span></pre>
+    <div class="repo-link">→ <a href="https://github.com/fnneves/kss-plugins">github.com/fnneves/kss-plugins</a></div>
+  </div>
+</section>
+
+<!-- ── chrome ── -->
+<div id="counter">1 / 6</div>
+<div id="hint">← → · space</div>
+
+<script>
+(function () {
+  const slides  = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  let current = 0;
+
+  function go(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides[current].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); go(current + 1); }
+    if (['ArrowLeft',  'ArrowUp'].includes(e.key))         { e.preventDefault(); go(current - 1); }
+  });
+
+  const obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) {
+        current = slides.indexOf(en.target);
+        counter.textContent = (current + 1) + ' / ' + slides.length;
+        if (en.target.classList.contains('invert')) {
+          document.body.classList.add('over-invert');
+        } else {
+          document.body.classList.remove('over-invert');
+        }
+      }
+    });
+  }, { threshold: 0.6 });
+  slides.forEach(function (s) { obs.observe(s); });
+})();
+</script>
+</body>
+</html>

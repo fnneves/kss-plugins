@@ -18,6 +18,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each pl
 
 **Layers:** Setup (2) · Lifecycle (3) · Session (3) · Knowledge (2) · Meta (1) · Utilities (1). Total 12 skills.
 
+**Documentation:**
+- Added 4 interactive HTML explainers under `plugins/kss/explainers/`, served via GitHub Pages:
+  - `01-kss-in-6-slides.html` — pitch deck with scroll-snap slides and ←/→ navigation.
+  - `02-self-improvement-loop.html` — interactive concept explainer for `skill-autopsy`. Click-to-set timeline, `~/.kss-source` toggle that swaps the outcome path, 4-stage circuit diagram.
+  - `03-skills-interaction.html` — data ownership graph for the 12 skills. Click a card to see what it writes/reads, downstream consumers, upstream feeders, and the failure mode it prevents.
+  - `04-kss-filesystem.html` — surface tour of `.kss/` with status pills (identity / pointer / overwrite / append / marker / moved) and hover tooltips, plus reference cards for external paths and conventions.
+- Added `plugins/kss/explainers/index.html` as the folder landing page.
+- Added "Documentation" section to the marketplace README with live Pages URLs.
+
+**Other:**
+- Fixed `.gitignore` typo (`./claude/skills` → `.claude/skills/`) so the personal in-repo skill dogfood folder is properly excluded.
+
 ### [0.1.0] - 2026-05-10
 
 Initial release.

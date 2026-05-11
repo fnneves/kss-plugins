@@ -12,6 +12,21 @@ This marketplace currently hosts a single plugin (`kss`). Designed to grow if mo
 |---|---|
 | [`kss`](plugins/kss/) | Keep Shit Simple — session-driven workflow with topics, milestones, spikes, and a canonical KB. Includes a self-improvement loop (`skill-autopsy`) and domain vocabulary capture. |
 
+## Documentation
+
+Interactive HTML explainers covering kss from different angles. Single-file artifacts, no build step, hosted via GitHub Pages.
+
+| | Explainer | What it covers |
+|---|---|---|
+| 01 | [kss in 6 slides](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/01-kss-in-6-slides.html) | The pitch deck — problem, core idea, 12 skills by layer, self-improvement loop, install. Scroll-snap slides with ←/→ navigation. |
+| 02 | [The self-improvement loop](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/02-self-improvement-loop.html) | Interactive concept explainer for `skill-autopsy`. Click the timeline, flip `~/.kss-source` to see how outcomes differ for forkers vs. plain installs. |
+| 03 | [How the 12 skills interact](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/03-skills-interaction.html) | Data ownership graph. Click any skill to see what it writes, reads, downstream consumers, upstream feeders, and the failure mode it prevents. |
+| 04 | [The `.kss/` file system](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/04-kss-filesystem.html) | Surface tour of every file under `.kss/`. Tabs across root / codebase / topics / spikes & archive, with behavior pills and authorship for each path. |
+
+Browse all explainers at <https://fnneves.github.io/kss-plugins/plugins/kss/explainers/>.
+
+For the plugin command reference and lifecycle diagram, see [`plugins/kss/README.md`](plugins/kss/README.md).
+
 ## Install
 
 Inside Claude Code, add this marketplace, then install whichever plugins you want individually:

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kss explainers</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 72px 32px 120px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  /* ── header ───────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(40px, 5vw, 56px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: var(--slate);
+    margin-bottom: 16px;
+    max-width: 22ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  p.lead {
+    font-size: 18px;
+    color: var(--g700);
+    max-width: 60ch;
+    margin-bottom: 8px;
+  }
+  p { margin: 0 0 12px; max-width: 64ch; }
+  .muted { color: var(--g500); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--g100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+
+  /* ── cards list ───────────────────────────────────────── */
+  .cards {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .card {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 20px;
+    align-items: start;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 28px 30px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 180ms;
+    position: relative;
+  }
+  .card:hover {
+    border-color: var(--slate);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(20,20,19,0.08);
+  }
+  .card .card-num {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--clay);
+    line-height: 1;
+    padding-top: 4px;
+  }
+  .card h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--slate);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .card h2 em { font-style: italic; color: var(--clay); }
+  .card p {
+    font-size: 14.5px;
+    color: var(--g700);
+    margin: 0 0 10px;
+    max-width: 60ch;
+    line-height: 1.6;
+  }
+  .card .card-meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--g500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+  .card .card-arrow {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--g300);
+    padding-top: 6px;
+    transition: transform 180ms, color 180ms;
+  }
+  .card:hover .card-arrow {
+    color: var(--clay);
+    transform: translateX(4px);
+  }
+  @media (max-width: 640px) {
+    .card { grid-template-columns: 48px 1fr; }
+    .card .card-arrow { display: none; }
+  }
+
+  /* ── coming-soon entry (no link) ──────────────────────── */
+  .card.soon {
+    background: var(--g100);
+    border-style: dashed;
+    cursor: default;
+    color: var(--g500);
+  }
+  .card.soon:hover {
+    border-color: var(--g300);
+    transform: none;
+    box-shadow: none;
+  }
+  .card.soon h2 { color: var(--g500); }
+  .card.soon .card-num { color: var(--g500); }
+  .card.soon .card-arrow { color: var(--g300); }
+  .card.soon:hover .card-arrow { color: var(--g300); transform: none; }
+
+  /* ── footer ───────────────────────────────────────────── */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1.5px solid var(--g300);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--g500);
+  }
+  footer .k {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--g700);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">kss · explainers</div>
+    <h1>kss, in <em>different lenses</em>.</h1>
+    <p class="lead">
+      Single-file interactive artifacts that explain what kss is and how its parts fit together. Each one is a different lens on the same framework. Open in any browser — no build step, no dependencies.
+    </p>
+    <p class="muted">
+      For the command reference and lifecycle diagram, see <a href="../README.md"><code>plugins/kss/README.md</code></a>.
+    </p>
+  </header>
+
+  <section class="cards">
+
+    <a class="card" href="01-kss-in-6-slides.html">
+      <div class="card-num">01</div>
+      <div>
+        <h2>kss in 6 slides</h2>
+        <p>The <em>pitch deck</em>. Problem → core idea → 12 skills, by layer → self-improvement loop → install. Scroll-snap slides, ←/→ navigation. 30 seconds to skim, 3 minutes to internalize.</p>
+        <div class="card-meta">slide deck · 6 viewports · keyboard navigation</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card" href="02-self-improvement-loop.html">
+      <div class="card-num">02</div>
+      <div>
+        <h2>The self-improvement loop</h2>
+        <p>Interactive concept explainer for <code>skill-autopsy</code> — the one mechanic in kss that isn't part of the workflow lifecycle. Click slots on the timeline to set the report count; flip the <code>~/.kss-source</code> toggle to see how the outcome differs for forkers vs. plain installs.</p>
+        <div class="card-meta">concept explainer · interactive timeline · live readouts</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card" href="03-skills-interaction.html">
+      <div class="card-num">03</div>
+      <div>
+        <h2>How the 12 skills interact</h2>
+        <p>Data ownership graph. The README mermaid shows lifecycle ordering; this shows the other lens. Click any skill to see what it writes, what it reads, downstream consumers, upstream feeders, and which failure mode it prevents.</p>
+        <div class="card-meta">surface tour · 12 skills · click-to-deepen + chip navigation</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card" href="04-kss-filesystem.html">
+      <div class="card-num">04</div>
+      <div>
+        <h2>The <code>.kss/</code> file system</h2>
+        <p>Surface tour of every file under <code>.kss/</code> — who writes it, who reads it, append-only vs. overwrite vs. pointer behavior, and the three design surprises that aren't obvious on first read. Tabs across root, codebase, topics, and spikes &amp; archive.</p>
+        <div class="card-meta">surface tour · 4 tabs · status pills + field tables</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </section>
+
+  <footer>
+    <span class="k">Lifecycle is the spine. Data is the connective tissue.</span>
+    <span>kss v0.2.0 · <a href="https://github.com/fnneves/kss-plugins">fnneves/kss-plugins</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

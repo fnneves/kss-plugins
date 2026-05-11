@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a skill fixes itself — kss explainer</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 64px 32px 120px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+
+  /* ── header ───────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 4.6vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    color: var(--slate);
+    margin-bottom: 14px;
+    max-width: 20ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  p.lead {
+    font-size: 17.5px;
+    color: var(--g700);
+    max-width: none;
+    margin-bottom: 8px;
+    text-align: justify;
+  }
+  p { margin: 0 0 12px; max-width: 64ch; }
+  .muted { color: var(--g500); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--g100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+
+  /* ── section divider ─────────────────────────────────── */
+  section { margin-top: 48px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--slate);
+    margin-bottom: 8px;
+    letter-spacing: -0.012em;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    margin-bottom: 6px;
+  }
+
+  /* ── interactive: viz head + zone legend ─────────────── */
+  .viz-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .reset-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: transparent;
+    border: 1.5px solid var(--g300);
+    border-radius: 999px;
+    padding: 5px 14px;
+    color: var(--g500);
+    cursor: pointer;
+    transition: all 140ms;
+  }
+  .reset-btn:hover {
+    border-color: var(--slate);
+    color: var(--slate);
+  }
+  .zone-legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--g500);
+    flex-wrap: wrap;
+  }
+  .zone-legend .zlg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+  }
+  .zone-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .zone-legend .dot-logging     { background: var(--olive); }
+  .zone-legend .dot-consolidate { background: var(--clay); }
+  .zone-legend .dot-escalation  { background: var(--clay-d); }
+
+  /* Inline toggle — lives inside readout 2 header row */
+  .rh-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .inline-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--g700);
+    cursor: pointer;
+    padding: 5px 12px;
+    background: var(--g100);
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    transition: all 140ms;
+    user-select: none;
+  }
+  .inline-toggle input {
+    width: 14px; height: 14px;
+    accent-color: var(--olive);
+    cursor: pointer;
+  }
+  .inline-toggle code {
+    background: transparent;
+    padding: 0;
+    font-size: 12px;
+  }
+  .inline-toggle.is-on {
+    background: rgba(120,140,93,0.16);
+    border-color: var(--olive);
+    color: var(--slate);
+  }
+  .readout.disabled .inline-toggle {
+    opacity: 0.45;
+  }
+
+  /* ── interactive: SVG timeline ───────────────────────── */
+  .viz {
+    margin-top: 18px;
+    padding: 24px 28px 20px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 12px;
+  }
+  .viz svg { display: block; width: 100%; height: auto; }
+  .viz .label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--g500);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── state pills ─────────────────────────────────────── */
+  .state-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1.5px solid var(--g300);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--g500);
+    transition: all 160ms;
+  }
+  .state-pill::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--g300);
+  }
+  .state-pill.active {
+    border-color: var(--slate);
+    color: var(--slate);
+    background: var(--oat);
+  }
+  .state-pill.active[data-state="logging"]::before { background: var(--olive); }
+  .state-pill.active[data-state="consolidate"]::before { background: var(--clay); }
+  .state-pill.active[data-state="escalation"]::before { background: var(--clay-d); }
+
+  /* ── readout cards ───────────────────────────────────── */
+  .readouts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  @media (max-width: 760px) {
+    .readouts { grid-template-columns: 1fr; }
+  }
+  .readout {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .readout .rh {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin-bottom: 10px;
+  }
+  .readout .rbody {
+    font-size: 14.5px;
+    color: var(--g700);
+    line-height: 1.6;
+  }
+  .readout .rbody strong { color: var(--slate); }
+  .readout.disabled { opacity: 0.55; }
+  .readout.disabled .rbody { font-style: italic; }
+  .readout.outcome.applied { border-left: 4px solid var(--olive); }
+  .readout.outcome.printed { border-left: 4px solid var(--sky); }
+
+  /* ── static explanation section ──────────────────────── */
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .step .badge {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--clay); color: var(--paper);
+    display: grid; place-content: center;
+    font-family: var(--mono); font-size: 13px;
+    font-weight: 600;
+  }
+  .step-body p { font-size: 15px; margin: 0 0 4px; max-width: 60ch; }
+  .step-body .step-loc {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--g500);
+    margin-bottom: 4px;
+  }
+
+  /* ── why-section (centered top, expanded circuit) ────── */
+  .why-section {
+    margin-top: 40px;
+    margin-bottom: 8px;
+  }
+  .why-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .why-card .ah {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--g500);
+    margin-bottom: 16px;
+  }
+  .why-card .pull {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--clay);
+    margin: 0 auto 20px;
+    max-width: 36ch;
+    line-height: 1.3;
+  }
+  .why-card .why-prose {
+    font-size: 14.5px;
+    color: var(--g700);
+    margin: 0;
+    max-width: 64ch;
+    line-height: 1.65;
+    text-align: left;
+  }
+  .why-card .why-circuit {
+    margin: 24px 0 14px;
+    background: var(--g100);
+    border-radius: 10px;
+    padding: 14px 16px 12px;
+  }
+  .why-card .why-circuit svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .why-card .threshold-note {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    margin: 10px auto 0;
+    max-width: 60ch;
+    font-style: italic;
+  }
+  .why-card .threshold-note em {
+    color: var(--clay);
+    font-weight: 600;
+  }
+
+  /* ── flow centered (steps only, no aside) ─────────────── */
+  .flow-centered {
+    max-width: 720px;
+    margin: 56px auto 0;
+  }
+  .flow-centered h2 { margin-top: 0; }
+
+  /* ── footer ──────────────────────────────────────────── */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1.5px solid var(--g300);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--g500);
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); }
+
+  /* ── timeline SVG styling ────────────────────────────── */
+  svg.timeline { font-family: var(--mono); }
+  svg.timeline .slot-num {
+    font-size: 12px;
+    fill: var(--g500);
+    pointer-events: none;
+  }
+  svg.timeline .threshold-label {
+    font-size: 10.5px;
+    fill: var(--clay);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  svg.timeline .threshold-label.escalation { fill: var(--clay-d); }
+  svg.timeline .threshold-sub {
+    font-size: 10.5px;
+    fill: var(--g500);
+  }
+  svg.timeline .axis {
+    font-size: 10.5px;
+    fill: var(--g500);
+  }
+  svg.timeline g.slot-grp { cursor: pointer; }
+  svg.timeline g.slot-grp:hover .report-slot {
+    stroke-width: 2;
+    stroke: var(--g700);
+  }
+  svg.timeline g.slot-grp:hover .slot-num {
+    fill: var(--slate);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">kss explainer · 02 · self-improvement loop</div>
+    <h1>How a skill <em>fixes itself</em>.</h1>
+    <p class="lead">
+      Most agent frameworks ship rigid skills. When one misfires, you have nowhere to put the feedback, so the same friction recurs forever. <strong>kss closes the loop</strong> — when a skill misfires, you log a short report; after enough reports accumulate, <code>skill-autopsy</code> proposes a concrete diff against that skill's <code>SKILL.md</code>.
+    </p>
+    <p class="muted">
+      Click slots on the timeline below. Watch what changes at the 4-report and 6-report thresholds. Flip the <code>~/.kss-source</code> toggle to see how the outcome path differs for forkers vs. plain installs.
+    </p>
+  </header>
+
+  <!-- ============================================================
+       Why this design? — centered thesis above the interactive
+       ============================================================ -->
+  <section class="why-section">
+    <div class="why-card">
+      <div class="ah">Why this design?</div>
+      <div class="pull">"Your frustration is the input."</div>
+      <div class="why-circuit">
+        <svg viewBox="0 0 880 220" role="img" aria-label="Self-improvement loop circuit — four stages">
+          <defs>
+            <marker id="ws-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#87867F"/>
+            </marker>
+            <marker id="ws-arrow-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#C5C2B9"/>
+            </marker>
+          </defs>
+
+          <!-- Node 1: create autopsy report -->
+          <g>
+            <rect x="38" y="44" width="180" height="64" rx="10" fill="#FAF9F5" stroke="#141413" stroke-width="1.5"/>
+            <text x="128" y="72" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="500" fill="#141413">create autopsy report</text>
+            <text x="128" y="92" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#87867F">/kss:skill-autopsy</text>
+          </g>
+
+          <!-- Arrow 1 -->
+          <line x1="222" y1="76" x2="242" y2="76" stroke="#87867F" stroke-width="1.5" marker-end="url(#ws-arrow)"/>
+          <text x="232" y="64" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#87867F">save</text>
+
+          <!-- Node 2: reports saved per skill -->
+          <g>
+            <rect x="246" y="44" width="180" height="64" rx="10" fill="rgba(217,119,87,0.08)" stroke="#D97757" stroke-width="1.5"/>
+            <text x="336" y="72" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="500" fill="#141413">reports saved per skill</text>
+            <text x="336" y="92" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#87867F">~/kss-skill-reports/</text>
+          </g>
+
+          <!-- Arrow 2 -->
+          <line x1="430" y1="76" x2="450" y2="76" stroke="#87867F" stroke-width="1.5" marker-end="url(#ws-arrow)"/>
+          <text x="440" y="64" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#D97757">at 4+</text>
+
+          <!-- Node 3: autopsy consolidate -->
+          <g>
+            <rect x="454" y="44" width="180" height="64" rx="10" fill="#FAF9F5" stroke="#141413" stroke-width="2"/>
+            <text x="544" y="72" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="500" fill="#141413">autopsy consolidate</text>
+            <text x="544" y="92" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#87867F">analyze · propose diff</text>
+          </g>
+
+          <!-- Arrow 3 -->
+          <line x1="638" y1="76" x2="658" y2="76" stroke="#87867F" stroke-width="1.5" marker-end="url(#ws-arrow)"/>
+          <text x="648" y="64" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#87867F">apply</text>
+
+          <!-- Node 4: SKILL.md improves -->
+          <g>
+            <rect x="662" y="44" width="180" height="64" rx="10" fill="#E3DACC" stroke="#141413" stroke-width="1.5"/>
+            <text x="752" y="72" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="500" fill="#141413">SKILL.md improves</text>
+            <text x="752" y="92" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#87867F">diff applied ✓</text>
+          </g>
+
+          <!-- Loop arrow: node 4 back to node 1 (dashed, subdued) -->
+          <path d="M 752,112 L 752,168 L 128,168 L 128,112"
+                fill="none" stroke="#C5C2B9" stroke-width="1.5" stroke-dasharray="6 5"
+                marker-end="url(#ws-arrow-dim)"/>
+          <text x="440" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" font-style="italic" fill="#87867F">next iteration — the skill is now sharper</text>
+        </svg>
+      </div>
+      <p class="threshold-note">The threshold (4 reports) is deliberate. One report is an incident; two is a coincidence; <em>four is a pattern.</em></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Interactive
+       ============================================================ -->
+  <section>
+
+    <div class="viz">
+      <div class="viz-head">
+        <div class="label">Report timeline &nbsp;·&nbsp; click a slot to set count</div>
+        <button type="button" id="resetBtn" class="reset-btn">reset to 0</button>
+      </div>
+      <svg viewBox="0 0 720 180" class="timeline" role="img" aria-label="Report accumulation timeline (interactive)">
+
+        <!-- threshold markers -->
+        <line x1="338" y1="32" x2="338" y2="146" stroke="#D97757" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="338" y="22" text-anchor="middle" class="threshold-label">consolidate offered</text>
+        <text x="338" y="164" text-anchor="middle" class="threshold-sub">at 4 reports</text>
+
+        <line x1="494" y1="32" x2="494" y2="146" stroke="#B85C3E" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="494" y="22" text-anchor="middle" class="threshold-label escalation">escalation</text>
+        <text x="494" y="164" text-anchor="middle" class="threshold-sub">at 6 reports</text>
+
+        <!-- 8 report slots (clickable) -->
+        <g id="slots">
+          <g class="slot-grp" data-n="1">
+            <rect class="report-slot" x="30"  y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="65"  y="95" text-anchor="middle">1</text>
+          </g>
+          <g class="slot-grp" data-n="2">
+            <rect class="report-slot" x="108" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="143" y="95" text-anchor="middle">2</text>
+          </g>
+          <g class="slot-grp" data-n="3">
+            <rect class="report-slot" x="186" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="221" y="95" text-anchor="middle">3</text>
+          </g>
+          <g class="slot-grp" data-n="4">
+            <rect class="report-slot" x="264" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="299" y="95" text-anchor="middle">4</text>
+          </g>
+          <g class="slot-grp" data-n="5">
+            <rect class="report-slot" x="342" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="377" y="95" text-anchor="middle">5</text>
+          </g>
+          <g class="slot-grp" data-n="6">
+            <rect class="report-slot" x="420" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="455" y="95" text-anchor="middle">6</text>
+          </g>
+          <g class="slot-grp" data-n="7">
+            <rect class="report-slot" x="498" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="533" y="95" text-anchor="middle">7</text>
+          </g>
+          <g class="slot-grp" data-n="8">
+            <rect class="report-slot" x="576" y="60" width="70" height="60" rx="6"/>
+            <text class="slot-num" x="611" y="95" text-anchor="middle">8</text>
+          </g>
+        </g>
+
+        <!-- baseline axis -->
+        <text x="30" y="140" class="axis">~/kss-skill-reports/&lt;skill&gt;.md</text>
+        <text x="700" y="140" text-anchor="end" class="axis">→ time</text>
+      </svg>
+      <div class="zone-legend">
+        <span class="zlg"><span class="dot dot-logging"></span>logging</span>
+        <span class="zlg"><span class="dot dot-consolidate"></span>consolidate offered &nbsp;(4+)</span>
+        <span class="zlg"><span class="dot dot-escalation"></span>escalation &nbsp;(6+)</span>
+      </div>
+    </div>
+
+    <div class="state-bar" id="stateBar">
+      <span class="state-pill active" data-state="logging">Logging mode</span>
+      <span class="state-pill" data-state="consolidate">Consolidate offered</span>
+      <span class="state-pill" data-state="escalation">Escalation</span>
+    </div>
+
+    <div class="readouts">
+      <div class="readout">
+        <div class="rh">If you run <code>/kss:skill-autopsy &lt;skill&gt;</code> now</div>
+        <div class="rbody" id="readout1"></div>
+      </div>
+      <div class="readout outcome" id="readout2Wrap">
+        <div class="rh-row">
+          <div class="rh">If you accept consolidation</div>
+          <label class="inline-toggle" id="srcToggleLabel" title="Optional — only matters once consolidation activates">
+            <input type="checkbox" id="srcToggle"/>
+            <span><code>~/.kss-source</code> set</span>
+          </label>
+        </div>
+        <div class="rbody" id="readout2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Static explanation — centered
+       ============================================================ -->
+  <section class="flow-centered">
+    <h2>The full flow, top to bottom.</h2>
+    <p class="muted">For when the interactive isn't enough. This is the canonical sequence.</p>
+
+    <div class="step">
+      <div class="badge">1</div>
+      <div class="step-body">
+        <div class="step-loc">A skill misfires during real work.</div>
+        <p>You ran <code>/kss:capture</code>, but it asked you for a trigger condition you didn't have on hand. Or <code>/kss:plan-milestone</code> over-scoped the chunk. The friction is fresh — capture it now or lose it.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">2</div>
+      <div class="step-body">
+        <div class="step-loc">/kss:skill-autopsy &lt;skill-name&gt;</div>
+        <p>Autopsy interviews you in 3-5 questions. Writes a short report at <code>~/kss-skill-reports/&lt;skill&gt;.md</code>. The path is intentional — these are <strong>personal</strong> and never committed to the plugin source.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">3</div>
+      <div class="step-body">
+        <div class="step-loc">Reports accumulate as you use the skill.</div>
+        <p>At <strong>4+ reports for the same skill</strong>, autopsy offers to consolidate. Past 5, the warning escalates — defer at your peril, because the same friction will keep recurring.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">4</div>
+      <div class="step-body">
+        <div class="step-loc">/kss:skill-autopsy &lt;skill&gt; --consolidate</div>
+        <p>Reads <em>all</em> reports for that skill. Looks for recurring root causes, not surface symptoms. If reports are vague or share no pattern, says so honestly instead of inventing improvements. Otherwise: proposes a concrete diff against the skill's <code>SKILL.md</code>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">5</div>
+      <div class="step-body">
+        <div class="step-loc">The fork: source-set vs. source-not-set.</div>
+        <p><strong>If <code>~/.kss-source</code> points to your clone:</strong> diff is applied to your local SKILL.md. Reports for that skill are cleared. You review, commit, push (or open a PR) on your own time.</p>
+        <p><strong>Otherwise:</strong> diff is <em>printed</em> for you to handle manually — fork later to apply, open a GitHub issue to send upstream, or just adapt your usage. Reports can be cleared either way.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="k">The framework is the friction you remember to fix.</span>
+    <span>v0.2.0 · plugins/kss/skills/skill-autopsy/</span>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+const toggle     = document.getElementById('srcToggle');
+const srcLabel   = document.getElementById('srcToggleLabel');
+const slotsEl    = document.getElementById('slots');
+const stateBar   = document.getElementById('stateBar');
+const readout1   = document.getElementById('readout1');
+const readout2   = document.getElementById('readout2');
+const readout2Wrap = document.getElementById('readout2Wrap');
+const resetBtn   = document.getElementById('resetBtn');
+
+const slots      = slotsEl.querySelectorAll('rect.report-slot');
+const slotGroups = slotsEl.querySelectorAll('g.slot-grp');
+let n = 3;  // current report count
+
+function stateOf(n) {
+  if (n >= 6) return 'escalation';
+  if (n >= 4) return 'consolidate';
+  return 'logging';
+}
+
+function fillForSlot(i, n) {
+  if (i >= n) {
+    return { fill: 'transparent', stroke: '#D1CFC5', strokeDash: '3 3' };
+  }
+  if (n >= 6) {
+    return { fill: '#FBE3DC', stroke: '#B85C3E', strokeDash: '0' };
+  }
+  if (n >= 4) {
+    return { fill: '#F4D9CB', stroke: '#D97757', strokeDash: '0' };
+  }
+  return { fill: '#E3DACC', stroke: '#D1CFC5', strokeDash: '0' };
+}
+
+function render() {
+  const sourceSet = toggle.checked;
+  const state = stateOf(n);
+
+  // toggle label visual state
+  srcLabel.classList.toggle('is-on', sourceSet);
+
+  // paint slots
+  slots.forEach((slot, i) => {
+    const f = fillForSlot(i, n);
+    slot.setAttribute('fill', f.fill);
+    slot.setAttribute('stroke', f.stroke);
+    slot.setAttribute('stroke-width', '1.5');
+    slot.setAttribute('stroke-dasharray', f.strokeDash);
+  });
+
+  // state pills
+  stateBar.querySelectorAll('.state-pill').forEach(p => p.classList.remove('active'));
+  stateBar.querySelector('.state-pill[data-state="' + state + '"]').classList.add('active');
+
+  // readout 1: what /kss:skill-autopsy <skill> does right now
+  if (n === 0) {
+    readout1.innerHTML = '<strong>Adds your first report.</strong> Autopsy interviews you about the misfire and writes <code>~/kss-skill-reports/&lt;skill&gt;.md</code>. No consolidation yet — that activates at 4.';
+  } else if (n < 4) {
+    readout1.innerHTML = '<strong>Appends another report.</strong> You now have <strong>' + n + '</strong> report' + (n > 1 ? 's' : '') + ' for this skill. Still in logging mode — ' + (4 - n) + ' short of the consolidate threshold.';
+  } else if (n < 6) {
+    readout1.innerHTML = '<strong>Logs the report AND offers to consolidate.</strong> ' + n + ' reports have accumulated. Autopsy can analyze them now for recurring root causes if you say yes.';
+  } else {
+    readout1.innerHTML = '<strong>Strongly recommends consolidating immediately.</strong> ' + n + ' reports is past the escalation threshold. The same friction has recurred ' + n + ' times — fix it before it becomes <em>' + (n + 1) + '</em>.';
+  }
+
+  // readout 2: outcome of consolidation
+  readout2Wrap.classList.remove('applied', 'printed', 'disabled');
+  if (n < 4) {
+    readout2Wrap.classList.add('disabled');
+    readout2.innerHTML = 'Not yet available. Consolidation activates at <strong>4+ reports</strong> for the same skill. Click a higher number above to see what happens then.';
+  } else {
+    const baseFlow = 'Autopsy reads all <strong>' + n + '</strong> reports, looks for recurring root causes, and proposes a concrete diff against the skill\'s <code>SKILL.md</code>. If reports share no pattern, it says so honestly — no inventing fixes from sparse evidence.';
+    if (sourceSet) {
+      readout2Wrap.classList.add('applied');
+      readout2.innerHTML = baseFlow + ' <br><br>→ <strong>Diff is applied</strong> to your clone at <code>~/.kss-source</code>. Reports for this skill are <strong>cleared</strong>. You review the change, commit, push (or open a PR) on your own time.';
+    } else {
+      readout2Wrap.classList.add('printed');
+      readout2.innerHTML = baseFlow + ' <br><br>→ <strong>Diff is printed</strong> to your terminal for manual handling — fork later to apply, open a GitHub issue to send upstream, or just adapt your usage. Reports can be cleared either way.';
+    }
+  }
+}
+
+slotGroups.forEach(g => {
+  g.addEventListener('click', () => {
+    n = +g.dataset.n;
+    render();
+  });
+});
+resetBtn.addEventListener('click', () => {
+  n = 0;
+  render();
+});
+toggle.addEventListener('change', render);
+render();
+</script>
+</body>
+</html>

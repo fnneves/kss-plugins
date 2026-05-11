@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the 12 skills interact — kss explainer</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 64px 32px 120px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  /* ── header ───────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 28px; height: 1.5px;
+    background: var(--clay);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(36px, 4.6vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    color: var(--slate);
+    margin-bottom: 14px;
+    max-width: 20ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  p.lead {
+    font-size: 17.5px;
+    color: var(--g700);
+    max-width: none;
+    margin-bottom: 8px;
+    text-align: justify;
+  }
+  p { margin: 0 0 12px; max-width: 64ch; }
+  .muted { color: var(--g500); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--g100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--slate);
+  }
+  section { margin-top: 48px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--slate);
+    margin-bottom: 8px;
+    letter-spacing: -0.012em;
+  }
+
+  /* ── two-column grid + sticky aside ───────────────────── */
+  .grid-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 40px;
+    margin-top: 36px;
+  }
+  @media (max-width: 1040px) {
+    .grid-section { grid-template-columns: 1fr; }
+    .detail-aside { position: static !important; }
+  }
+  .detail-aside {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  /* ── layer rows + skill cards ─────────────────────────── */
+  .layer-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 22px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--g200);
+  }
+  .layer-row:last-child { border-bottom: none; }
+  .layer-label {
+    padding-top: 6px;
+  }
+  .layer-name {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    margin-bottom: 2px;
+  }
+  .layer-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--g500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .layer-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .skill-card {
+    position: relative;
+    text-align: left;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 10px;
+    padding: 16px 18px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--g700);
+    transition: all 160ms;
+    flex: 1 1 220px;
+    min-width: 200px;
+    max-width: 280px;
+    overflow: hidden;
+  }
+  .skill-card:hover {
+    border-color: var(--g500);
+    transform: translateY(-1px);
+  }
+  .skill-card .sk-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .skill-card[data-layer="setup"]     .sk-stripe { background: var(--olive); }
+  .skill-card[data-layer="lifecycle"] .sk-stripe { background: var(--clay); }
+  .skill-card[data-layer="session"]   .sk-stripe { background: var(--sky); }
+  .skill-card[data-layer="knowledge"] .sk-stripe { background: var(--oat); }
+  .skill-card[data-layer="meta"]      .sk-stripe { background: var(--clay-d); }
+  .skill-card[data-layer="utilities"] .sk-stripe { background: var(--g500); }
+
+  .skill-card .sk-name {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--slate);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .skill-card .sk-gloss {
+    font-size: 13px;
+    color: var(--g500);
+    line-height: 1.5;
+  }
+
+  /* selected + related visual states */
+  .skill-card.selected {
+    border-color: var(--clay);
+    border-width: 2px;
+    background: rgba(217,119,87,0.06);
+    box-shadow: 0 4px 14px rgba(217,119,87,0.12);
+  }
+  .skill-card.selected .sk-name { color: var(--clay-d); }
+  .skill-card.related {
+    border-color: var(--clay);
+    border-style: dashed;
+  }
+
+  /* ── detail panel ─────────────────────────────────────── */
+  .detail-card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 26px 28px 28px;
+  }
+  .d-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .d-layer-pill {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--g100);
+    color: var(--g700);
+    border: 1.5px solid var(--g200);
+  }
+  .d-layer-pill[data-layer="setup"]     { background: rgba(120,140,93,0.14); color: var(--olive); border-color: rgba(120,140,93,0.3); }
+  .d-layer-pill[data-layer="lifecycle"] { background: rgba(217,119,87,0.14); color: var(--clay-d); border-color: rgba(217,119,87,0.3); }
+  .d-layer-pill[data-layer="session"]   { background: rgba(106,140,175,0.14); color: var(--sky); border-color: rgba(106,140,175,0.3); }
+  .d-layer-pill[data-layer="knowledge"] { background: var(--oat); color: var(--slate); border-color: transparent; }
+  .d-layer-pill[data-layer="meta"]      { background: rgba(176,74,63,0.12); color: var(--clay-d); border-color: rgba(176,74,63,0.3); }
+  .d-layer-pill[data-layer="utilities"] { background: var(--slate); color: var(--ivory); border-color: transparent; }
+
+  .d-name {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--slate);
+    margin-top: 8px;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  .d-invoke {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    background: var(--g100);
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    display: inline-block;
+    word-break: break-all;
+  }
+  .d-section {
+    margin-top: 16px;
+  }
+  .d-section-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin-bottom: 6px;
+  }
+  .d-section-body {
+    font-size: 13.5px;
+    color: var(--g700);
+    line-height: 1.55;
+  }
+  .d-section-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .d-section-body li {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--g700);
+    padding: 3px 0;
+    border-bottom: 1px dashed var(--g200);
+    word-break: break-all;
+  }
+  .d-section-body li:last-child { border-bottom: none; }
+  .d-section-body li.muted-li {
+    color: var(--g500);
+    font-style: italic;
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+  .d-related {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .d-related .chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: var(--g100);
+    color: var(--g700);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--g200);
+    cursor: pointer;
+    transition: all 140ms;
+  }
+  .d-related .chip:hover {
+    border-color: var(--clay);
+    color: var(--clay-d);
+  }
+  .d-related .chip.empty {
+    cursor: default;
+    color: var(--g500);
+    font-style: italic;
+    font-family: var(--sans);
+  }
+  .d-related .chip.empty:hover { border-color: var(--g200); color: var(--g500); }
+
+  .d-empty {
+    color: var(--g500);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .d-prevents {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: rgba(176,74,63,0.06);
+    border-left: 3px solid var(--clay-d);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--g700);
+    line-height: 1.55;
+  }
+  .d-prevents-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clay-d);
+    margin-bottom: 4px;
+  }
+
+  /* ── footer ──────────────────────────────────────────── */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1.5px solid var(--g300);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--g500);
+  }
+  footer .k {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--g700);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">kss explainer · 03 · skills interaction</div>
+    <h1>How the 12 skills <em>interact</em>.</h1>
+    <p class="lead">
+      Lifecycle ordering is one lens — the README mermaid covers that. This page shows the other lens: <strong>data ownership</strong>. Which skill writes which file. Which skill reads it. Where the loops close. Click any skill to see what it writes, what it reads, when to invoke it, and which failure mode it prevents.
+    </p>
+    <p class="muted">
+      Related skills — upstream feeders and downstream consumers — get a clay dashed border when you select a card. The colored stripe at the top of each card marks its layer.
+    </p>
+  </header>
+
+  <!-- ============================================================
+       Skills grid + detail aside
+       ============================================================ -->
+  <section class="grid-section">
+
+    <main class="skills-grid">
+
+      <div class="layer-row" data-layer="setup">
+        <div class="layer-label">
+          <div class="layer-name">Setup</div>
+          <div class="layer-count">2 skills</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="scaffold-project" data-layer="setup">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">scaffold-project</div>
+            <div class="sk-gloss">Bootstrap the <code>.kss/</code> shell — folders, state files, conventions. Once per project.</div>
+          </button>
+          <button class="skill-card" data-k="map-codebase" data-layer="setup">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">map-codebase</div>
+            <div class="sk-gloss">Snapshot STACK / STRUCTURE / CONVENTIONS / VOCABULARY for the codebase.</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="layer-row" data-layer="lifecycle">
+        <div class="layer-label">
+          <div class="layer-name">Lifecycle</div>
+          <div class="layer-count">3 skills</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="new-topic" data-layer="lifecycle">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">new-topic</div>
+            <div class="sk-gloss">Create and activate a topic. Isolates an unrelated work track.</div>
+          </button>
+          <button class="skill-card" data-k="plan-milestone" data-layer="lifecycle">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">plan-milestone</div>
+            <div class="sk-gloss">Scope and plan a finite chunk inside the active topic.</div>
+          </button>
+          <button class="skill-card" data-k="complete-milestone" data-layer="lifecycle">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">complete-milestone</div>
+            <div class="sk-gloss">Close the active milestone with a SUMMARY. <code>--archive-topic</code> archives the whole topic.</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="layer-row" data-layer="session">
+        <div class="layer-label">
+          <div class="layer-name">Session</div>
+          <div class="layer-count">3 skills</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="start-session" data-layer="session">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">start-session</div>
+            <div class="sk-gloss">Load context for active topic + milestone. Read-only.</div>
+          </button>
+          <button class="skill-card" data-k="spike" data-layer="session">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">spike</div>
+            <div class="sk-gloss">Throwaway exploration with verdict. Test before committing.</div>
+          </button>
+          <button class="skill-card" data-k="wrap-up" data-layer="session">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">wrap-up</div>
+            <div class="sk-gloss">Append LOG entry, refresh STATE, optional note. Run at session end.</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="layer-row" data-layer="knowledge">
+        <div class="layer-label">
+          <div class="layer-name">Knowledge</div>
+          <div class="layer-count">2 skills</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="capture" data-layer="knowledge">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">capture</div>
+            <div class="sk-gloss">Park a seed (with trigger), idea, or scratch note. Anytime.</div>
+          </button>
+          <button class="skill-card" data-k="distill" data-layer="knowledge">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">distill</div>
+            <div class="sk-gloss">Promote durable insights from LOG + notes into the canonical KB.</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="layer-row" data-layer="meta">
+        <div class="layer-label">
+          <div class="layer-name">Meta</div>
+          <div class="layer-count">1 skill</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="skill-autopsy" data-layer="meta">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">skill-autopsy</div>
+            <div class="sk-gloss">Log misfire reports per skill. Consolidate into diffs against SKILL.md.</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="layer-row" data-layer="utilities">
+        <div class="layer-label">
+          <div class="layer-name">Utilities</div>
+          <div class="layer-count">1 skill</div>
+        </div>
+        <div class="layer-skills">
+          <button class="skill-card" data-k="explore-html" data-layer="utilities">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">explore-html</div>
+            <div class="sk-gloss">Build one-off HTML artifacts — reports, diagrams, slides, comparisons, kanban editors.</div>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <aside class="detail-aside">
+      <div class="detail-card" id="detail">
+        <!-- populated by JS -->
+      </div>
+    </aside>
+
+  </section>
+
+  <footer>
+    <span class="k">Lifecycle is the spine. Data is the connective tissue.</span>
+    <span>kss v0.2.0 · 12 skills · 6 layers</span>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+const SKILLS = {
+  'scaffold-project': {
+    layer: 'setup',
+    invoke: '/kss:scaffold-project',
+    when: 'Once per project, before anything else. Creates the bare `.kss/` shell so other skills have something to read and write.',
+    writes: [
+      '.kss/PROJECT.md',
+      '.kss/STATE.md (empty pointer)',
+      '.kss/CANONICAL-KB.md (empty)',
+      '.kss/codebase/ (folder)',
+      '.kss/topics/ (folder)',
+      '.kss/spikes/ (folder)',
+      '.kss/archive/ (folder)'
+    ],
+    reads: ['(none — fresh start)'],
+    feeds: ['map-codebase', 'new-topic', 'capture', 'start-session'],
+    fedBy: [],
+    prevents: 'Inconsistent .kss/ shape across projects. Every kss-managed project starts with the same skeleton.'
+  },
+  'map-codebase': {
+    layer: 'setup',
+    invoke: '/kss:map-codebase',
+    when: 'Once per project after scaffold. Rerun after major refactors. STACK/STRUCTURE/CONVENTIONS overwrite; VOCABULARY is append-only across runs.',
+    writes: [
+      '.kss/codebase/STACK.md (overwrite)',
+      '.kss/codebase/STRUCTURE.md (overwrite)',
+      '.kss/codebase/CONVENTIONS.md (overwrite)',
+      '.kss/codebase/VOCABULARY.md (seed; append-only after)'
+    ],
+    reads: ['The codebase itself.'],
+    feeds: ['plan-milestone', 'start-session', 'distill'],
+    fedBy: ['scaffold-project'],
+    prevents: 'Re-deriving codebase shape every session. Domain vocabulary drift between sessions.'
+  },
+  'new-topic': {
+    layer: 'lifecycle',
+    invoke: '/kss:new-topic',
+    when: 'When starting work unrelated to the current active topic. Topics isolate work tracks so logs don\'t cross-contaminate.',
+    writes: [
+      '.kss/topics/<slug>/TOPIC.md',
+      '.kss/topics/<slug>/STATE.md',
+      '.kss/topics/<slug>/LOG.md (empty)',
+      '.kss/topics/<slug>/SEEDS.md (empty)',
+      '.kss/topics/<slug>/MILESTONES.md (empty)',
+      '.kss/STATE.md (updates active-topic pointer)'
+    ],
+    reads: ['.kss/STATE.md', '.kss/PROJECT.md'],
+    feeds: ['plan-milestone', 'start-session', 'capture'],
+    fedBy: ['scaffold-project', 'complete-milestone'],
+    prevents: 'Mixing unrelated work into one topic LOG. Two simultaneous tracks compete for context.'
+  },
+  'plan-milestone': {
+    layer: 'lifecycle',
+    invoke: '/kss:plan-milestone',
+    when: 'When scoping a finite chunk inside the active topic. Adaptive — discusses scope first if fuzzy, plans directly if not.',
+    writes: [
+      '.kss/topics/<topic>/milestones/<v>-<slug>/PLAN.md',
+      '.kss/STATE.md (active-milestone pointer)'
+    ],
+    reads: [
+      '.kss/topics/<topic>/TOPIC.md',
+      '.kss/codebase/STRUCTURE.md',
+      '.kss/codebase/CONVENTIONS.md'
+    ],
+    feeds: ['start-session', 'complete-milestone'],
+    fedBy: ['new-topic', 'map-codebase'],
+    prevents: 'Over-scoped milestones; "drift" mid-execution because no anchored plan exists.'
+  },
+  'complete-milestone': {
+    layer: 'lifecycle',
+    invoke: '/kss:complete-milestone',
+    when: 'When the active milestone has shipped (or been abandoned). Use `--archive-topic` to retire the whole topic at the same time.',
+    writes: [
+      '.kss/topics/<topic>/milestones/<v>-<slug>/SUMMARY.md',
+      '.kss/topics/<topic>/MILESTONES.md (append, newest-on-top)',
+      '.kss/STATE.md (clears milestone pointer)'
+    ],
+    reads: [
+      'PLAN.md',
+      '.kss/topics/<topic>/LOG.md (recent entries)',
+      'spike findings if relevant'
+    ],
+    feeds: ['new-topic'],
+    fedBy: ['plan-milestone', 'wrap-up', 'spike'],
+    prevents: 'Milestones bleeding into each other. No durable record of what shipped vs. what slipped.'
+  },
+  'start-session': {
+    layer: 'session',
+    invoke: '/kss:start-session',
+    when: 'At the start of every coding session. Read-only — loads context, never writes state.',
+    writes: ['(no files — pure context load)'],
+    reads: [
+      '.kss/STATE.md (active pointers)',
+      '.kss/topics/<topic>/STATE.md',
+      '.kss/topics/<topic>/LOG.md (recent entries)',
+      'active PLAN.md',
+      '.kss/codebase/* (for orientation)'
+    ],
+    feeds: ['wrap-up', 'spike', 'capture', 'explore-html'],
+    fedBy: ['scaffold-project', 'map-codebase', 'new-topic', 'plan-milestone', 'wrap-up'],
+    prevents: 'Cold starts where you re-derive "where was I" from git log + memory. Lost continuity between sessions.'
+  },
+  'spike': {
+    layer: 'session',
+    invoke: '/kss:spike',
+    when: 'Mid-session when an idea needs testing before commitment. Throwaway by design — produces a verdict, not production code.',
+    writes: [
+      '.kss/spikes/YYYYMMDD-<slug>/README.md (question, approach, findings, verdict)'
+    ],
+    reads: ['(none — independent exploration)'],
+    feeds: ['distill', 'complete-milestone'],
+    fedBy: ['start-session'],
+    prevents: 'Carrying unverified ideas into PLAN.md. Sunk-cost commitment to approaches that don\'t actually work.'
+  },
+  'wrap-up': {
+    layer: 'session',
+    invoke: '/kss:wrap-up',
+    when: 'At the end of every coding session. Always — even if nothing shipped, you want the LOG entry.',
+    writes: [
+      '.kss/topics/<topic>/LOG.md (append entry, newest-on-top)',
+      '.kss/topics/<topic>/STATE.md (refresh focus + blockers)',
+      'optional .kss/topics/<topic>/milestones/<v>/note-YYYYMMDD-*.md'
+    ],
+    reads: ['Session activity in your head + recent edits.'],
+    feeds: ['start-session', 'distill', 'complete-milestone'],
+    fedBy: ['start-session'],
+    prevents: 'Forgetting where you left off. LOG.md going stale and useless. State files drifting from reality.'
+  },
+  'capture': {
+    layer: 'knowledge',
+    invoke: '/kss:capture',
+    when: 'Anytime — a seed, idea, or scratch note crosses your mind. Drop it before flow breaks. Seeds require trigger conditions; capture refuses seeds without them.',
+    writes: [
+      '.kss/topics/<topic>/SEEDS.md (seeds with triggers)',
+      'scratch notes (free-form)'
+    ],
+    reads: ['(none)'],
+    feeds: ['distill'],
+    fedBy: ['scaffold-project', 'new-topic', 'start-session'],
+    prevents: 'Ideas evaporating between sessions. Seeds without triggers (which rot — capture refuses them).'
+  },
+  'distill': {
+    layer: 'knowledge',
+    invoke: '/kss:distill',
+    when: 'Periodically — when LOG.md and notes have accumulated and a pattern is emerging. The rot-prevention pass.',
+    writes: [
+      '.kss/CANONICAL-KB.md (append insights)',
+      '.kss/codebase/VOCABULARY.md (append candidates)'
+    ],
+    reads: [
+      'LOG.md',
+      'SEEDS.md',
+      'recent notes',
+      'recent spikes',
+      'milestone SUMMARY.md files'
+    ],
+    feeds: [],
+    fedBy: ['wrap-up', 'capture', 'spike', 'map-codebase'],
+    prevents: 'Knowledge rotting in scattered notes. Vocabulary drift between codebase changes and your mental model.'
+  },
+  'skill-autopsy': {
+    layer: 'meta',
+    invoke: '/kss:skill-autopsy <skill-name>',
+    when: 'After a frustration with a specific skill. Two modes: log a single report, or consolidate accumulated reports into a SKILL.md diff (4+ reports).',
+    writes: [
+      '~/kss-skill-reports/<skill>.md (logging mode — personal, never committed)',
+      'diff against the skill\'s SKILL.md (consolidate mode)'
+    ],
+    reads: [
+      'Previous reports for the named skill',
+      'The skill\'s SKILL.md (during consolidate)'
+    ],
+    feeds: [],
+    fedBy: [],
+    prevents: 'The same friction recurring forever with no path to fix the skill. Rigid skills that nobody bothers to improve.'
+  },
+  'explore-html': {
+    layer: 'utilities',
+    invoke: '/kss:explore-html',
+    when: 'When an HTML artifact would beat markdown — reports, diagrams, slides, side-by-side comparisons, kanban editors. Always confirms format + destination first.',
+    writes: [
+      '/tmp/explorer-<slug>.html (throwaway, CDN-OK)',
+      'or a persistent path you choose (offline-safe required)'
+    ],
+    reads: [
+      'Whatever the user is exploring',
+      'often via a real-data JSON sidecar'
+    ],
+    feeds: [],
+    fedBy: ['start-session'],
+    prevents: 'Forcing spatial / interactive / comparative content into linear markdown. "Walls of prose" that don\'t get read.'
+  }
+};
+
+const LAYER_LABEL = {
+  setup: 'Setup',
+  lifecycle: 'Lifecycle',
+  session: 'Session',
+  knowledge: 'Knowledge',
+  meta: 'Meta',
+  utilities: 'Utilities'
+};
+
+const detail = document.getElementById('detail');
+const cards = document.querySelectorAll('.skill-card');
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderList(items, isEmpty) {
+  if (!items || items.length === 0) return '<li class="muted-li">(none)</li>';
+  return items.map(it => '<li>' + escapeHtml(it) + '</li>').join('');
+}
+
+function renderChips(keys) {
+  if (!keys || keys.length === 0) {
+    return '<span class="chip empty">(none direct)</span>';
+  }
+  return keys.map(k => '<button class="chip" data-jump="' + escapeHtml(k) + '">' + escapeHtml(k) + '</button>').join('');
+}
+
+function selectSkill(key) {
+  const s = SKILLS[key];
+  if (!s) return;
+
+  // visual states on cards
+  cards.forEach(c => {
+    c.classList.remove('selected', 'related');
+    const k = c.dataset.k;
+    if (k === key) c.classList.add('selected');
+    else if (s.feeds.includes(k) || s.fedBy.includes(k)) c.classList.add('related');
+  });
+
+  // build detail panel
+  detail.innerHTML = `
+    <div class="d-head">
+      <span class="d-layer-pill" data-layer="${s.layer}">${LAYER_LABEL[s.layer]}</span>
+    </div>
+    <div class="d-name">${escapeHtml(key)}</div>
+    <div class="d-invoke">${escapeHtml(s.invoke)}</div>
+
+    <div class="d-section">
+      <div class="d-section-label">When to invoke</div>
+      <div class="d-section-body">${s.when.replace(/`([^`]+)`/g, '<code>$1</code>')}</div>
+    </div>
+
+    <div class="d-section">
+      <div class="d-section-label">Writes</div>
+      <div class="d-section-body">
+        <ul>${renderList(s.writes)}</ul>
+      </div>
+    </div>
+
+    <div class="d-section">
+      <div class="d-section-label">Reads</div>
+      <div class="d-section-body">
+        <ul>${renderList(s.reads)}</ul>
+      </div>
+    </div>
+
+    <div class="d-section">
+      <div class="d-section-label">Feeds (downstream consumers)</div>
+      <div class="d-section-body">
+        <div class="d-related">${renderChips(s.feeds)}</div>
+      </div>
+    </div>
+
+    <div class="d-section">
+      <div class="d-section-label">Fed by (upstream producers)</div>
+      <div class="d-section-body">
+        <div class="d-related">${renderChips(s.fedBy)}</div>
+      </div>
+    </div>
+
+    <div class="d-prevents">
+      <div class="d-prevents-label">Failure mode it prevents</div>
+      ${escapeHtml(s.prevents)}
+    </div>
+  `;
+
+  // wire the chip jump-to-skill behavior
+  detail.querySelectorAll('.chip[data-jump]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const target = chip.dataset.jump;
+      selectSkill(target);
+      // scroll the target card into view if needed
+      const card = document.querySelector('.skill-card[data-k="' + target + '"]');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+}
+
+// wire card clicks
+cards.forEach(c => {
+  c.addEventListener('click', () => selectSkill(c.dataset.k));
+});
+
+// initial selection — start with scaffold-project (the entry point)
+selectSkill('scaffold-project');
+</script>
+</body>
+</html>
