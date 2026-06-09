@@ -1,0 +1,397 @@
+/* ============================================================
+   messages-panel.css — left-side transcript panel
+   ============================================================ */
+
+:root {
+  --exh-panel-w: 360px;
+}
+
+.exh-msg-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--exh-panel-w);
+  height: 100vh;
+  background: var(--paper, #FFFFFF);
+  border-right: 1.5px solid var(--bd-hair, #D1CFC5);
+  z-index: 2147483198;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  transition:
+    transform 280ms var(--ease-out, ease),
+    opacity 220ms var(--ease-out, ease);
+  font-family: var(--font-body, system-ui, sans-serif);
+  color: var(--fg-default, #3D3D3A);
+}
+.exh-msg-panel.is-collapsed {
+  transform: translateX(calc(-100% + 32px));
+}
+/* Drag-to-resize handle on the right edge */
+.exh-msg-resize {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 1;
+}
+.exh-msg-resize:hover,
+.exh-msg-resize.is-dragging {
+  background: var(--pill-clay-bg);
+}
+.exh-msg-panel.is-collapsed .exh-msg-resize { display: none; }
+/* When dragging, suppress text selection */
+body.exh-msg-resizing,
+body.exh-msg-resizing * {
+  user-select: none !important;
+  cursor: ew-resize !important;
+}
+
+.exh-msg-head {
+  display: flex;
+  align-items: center;
+  padding: 14px 12px 12px 20px;
+  border-bottom: 1px solid var(--bd-soft, #E6E3DA);
+  background: var(--ivory, #FAF9F5);
+}
+.exh-msg-eyebrow {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: var(--fs-eyebrow-tight, 11px);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-eyebrow, 0.08em);
+  color: var(--clay, #D97757);
+}
+
+/* Toggle lives outside the panel so it stays clickable when the panel
+   is translated off-screen. */
+.exh-msg-toggle {
+  position: fixed;
+  top: 50%;
+  left: var(--exh-panel-w);
+  transform: translate(-50%, -50%);
+  z-index: 2147483199;
+  background: var(--paper, #FFFFFF);
+  border: 1.5px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-pill, 999px);
+  width: 30px;
+  height: 40px;
+  cursor: pointer;
+  color: var(--fg-muted, #87867F);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(20, 20, 19, 0.08);
+  transition:
+    left 280ms var(--ease-out, ease),
+    color var(--t-fast, 120ms),
+    border-color var(--t-fast, 120ms);
+}
+.exh-msg-toggle:hover {
+  color: var(--clay, #D97757);
+  border-color: var(--clay, #D97757);
+}
+/* When the panel is collapsed, slide the toggle to the left edge.
+   Toggle is centered via translate(-50%), so left must be at least
+   half its width (15px) to keep it fully on-screen. */
+body.exh-panel-collapsed .exh-msg-toggle {
+  left: 24px;
+}
+
+/* Body — scrollable transcript */
+.exh-msg-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  padding: 12px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Each entry — a card with a tiny meta row */
+.exh-msg-entry {
+  padding: 10px 12px 12px;
+  background: var(--ivory, #FAF9F5);
+  border: 1px solid var(--bd-soft, #E6E3DA);
+  border-radius: var(--r-md, 8px);
+  transition: box-shadow var(--t-base, 150ms);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.exh-msg-entry code,
+.exh-msg-entry pre {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  white-space: pre-wrap;
+  max-width: 100%;
+}
+.exh-msg-target code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.exh-msg-entry.is-new {
+  box-shadow: 0 0 0 3px var(--pill-clay-bg);
+}
+
+.exh-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.exh-msg-author {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted, #87867F);
+}
+.exh-msg-entry.exh-msg-reply .exh-msg-author { color: var(--clay, #D97757); }
+.exh-msg-time {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10.5px;
+  color: var(--fg-muted, #87867F);
+  margin-left: auto;
+}
+
+.exh-msg-target {
+  font-size: 12.5px;
+  color: var(--fg-muted, #87867F);
+  margin-bottom: 4px;
+}
+.exh-msg-target code {
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 11px;
+  background: var(--g100, #F0EEE6);
+  padding: 1px 5px;
+  border-radius: var(--r-xs, 4px);
+}
+.exh-msg-body-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--fg-strong, #141413);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Reply content uses the FULL design system primitives — but scaled
+   down so they fit a 320-ish-wide column. */
+.exh-msg-content {
+  font-size: 13.5px;
+  line-height: 1.55;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.exh-msg-content code,
+.exh-msg-content pre { overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; max-width: 100%; }
+.exh-msg-content h1, .exh-msg-content h2, .exh-msg-content h3 {
+  font-family: var(--font-heading, ui-serif, serif);
+  font-weight: 500;
+  color: var(--fg-strong, #141413);
+  margin: 0 0 6px;
+}
+.exh-msg-content h1 { font-size: 18px; }
+.exh-msg-content h2 { font-size: 16.5px; }
+.exh-msg-content h3 { font-size: 15px; }
+.exh-msg-content h4 {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted, #87867F);
+  margin: 0 0 4px;
+}
+.exh-msg-content p { margin: 0 0 8px; }
+.exh-msg-content p:last-child { margin-bottom: 0; }
+.exh-msg-content em { font-style: italic; color: var(--clay, #D97757); }
+.exh-msg-content code {
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 12px;
+  background: var(--g100, #F0EEE6);
+  padding: 1px 5px;
+  border-radius: var(--r-xs, 4px);
+  color: var(--fg-strong, #141413);
+}
+.exh-msg-content ul, .exh-msg-content ol { margin: 0 0 8px 18px; padding: 0; }
+.exh-msg-content li { margin-bottom: 2px; }
+
+/* Editorial primitives rendered inside replies. Match the page's tokens
+   but shrink the spacing for the narrow column. */
+.exh-msg-content .finding {
+  border-left: 3px solid var(--clay, #D97757);
+  padding: 8px 10px;
+  background: var(--paper, #FFFFFF);
+  border-radius: 0 var(--r-sm, 6px) var(--r-sm, 6px) 0;
+  margin: 8px 0;
+}
+.exh-msg-content .verdict {
+  background: var(--paper, #FFFFFF);
+  border: 1px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-sm, 6px);
+  padding: 8px 10px;
+  margin: 8px 0;
+}
+.exh-msg-content .verdict.is-pass { border-color: var(--olive, #788C5D); }
+.exh-msg-content .verdict.is-fail { border-color: var(--clay, #D97757); }
+.exh-msg-content .verdict.is-info { border-color: var(--sky, #6A8CAF); }
+.exh-msg-content .card {
+  background: var(--paper, #FFFFFF);
+  border: 1px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-sm, 6px);
+  padding: 8px 10px;
+  margin: 8px 0;
+}
+.exh-msg-content .card-rec {
+  border-color: var(--clay, #D97757);
+  position: relative;
+}
+.exh-msg-content .card-rec::before {
+  content: "RECOMMENDED";
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: var(--clay, #D97757);
+  color: var(--ivory, #FAF9F5);
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: var(--r-xs, 4px);
+}
+.exh-msg-content .pill {
+  display: inline-block;
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid;
+  line-height: 1.4;
+  vertical-align: 1px;
+}
+.exh-msg-content .pill-clay,
+.exh-msg-content .pill-critical { background: var(--pill-clay-bg);  border-color: var(--pill-clay-bd);  color: var(--clay-d, #B85C3E); }
+.exh-msg-content .pill-olive,
+.exh-msg-content .pill-used,
+.exh-msg-content .pill-pass     { background: var(--pill-olive-bg); border-color: var(--pill-olive-bd); color: var(--olive, #788C5D); }
+.exh-msg-content .pill-sky,
+.exh-msg-content .pill-info,
+.exh-msg-content .pill-warn     { background: var(--pill-sky-bg);   border-color: var(--pill-sky-bd);   color: var(--sky, #6A8CAF); }
+.exh-msg-content .pill-fail     { background: var(--pill-clay-bg);  border-color: var(--clay, #D97757); color: var(--clay-d, #B85C3E); }
+.exh-msg-content .pill-oat      { background: var(--oat, #E3DACC);  border-color: var(--g300, #D1CFC5); color: var(--g700, #3D3D3A); }
+.exh-msg-content .pill-slate    { background: var(--slate, #141413); border-color: var(--slate, #141413); color: var(--ivory, #FAF9F5); }
+.exh-msg-content .pill-unused   { background: var(--g100, #F0EEE6); border-color: var(--g300, #D1CFC5); color: var(--g500, #87867F); }
+
+/* When the panel is open, push the main page content right so it doesn't
+   slide under the panel. The 20px gutter is a constant; the panel width
+   is a custom property so this stays in sync when the user drag-resizes. */
+@media (min-width: 1100px) {
+  body:not(.exh-panel-collapsed) .wrap { margin-left: calc(var(--exh-panel-w) + 20px) !important; }
+  body.exh-panel-collapsed .wrap { margin-left: auto !important; }
+}
+
+/* Local feedback/messages also use the system pills */
+.exh-msg-entry .pill {
+  display: inline-block;
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid;
+  line-height: 1.4;
+}
+.exh-msg-entry .pill-clay,
+.exh-msg-entry .pill-critical { background: var(--pill-clay-bg);  border-color: var(--pill-clay-bd);  color: var(--clay-d, #B85C3E); }
+.exh-msg-entry .pill-olive    { background: var(--pill-olive-bg); border-color: var(--pill-olive-bd); color: var(--olive, #788C5D); }
+.exh-msg-entry .pill-sky,
+.exh-msg-entry .pill-info     { background: var(--pill-sky-bg);   border-color: var(--pill-sky-bd);   color: var(--sky, #6A8CAF); }
+
+/* --- Inline chat input (bottom row) ----------------------- */
+.exh-msg-input {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--bd-soft, #E6E3DA);
+  background: var(--ivory, #FAF9F5);
+}
+.exh-msg-textarea {
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: none;
+  min-height: 38px;
+  max-height: 140px;
+  background: var(--paper, #FFFFFF);
+  border: 1px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-sm, 6px);
+  color: var(--fg-strong, #141413);
+  outline: none;
+  transition: border-color var(--t-fast, 120ms);
+}
+.exh-msg-textarea:focus { border-color: var(--clay, #D97757); }
+.exh-msg-textarea::placeholder {
+  color: var(--fg-muted, #87867F);
+}
+.exh-msg-send {
+  background: var(--oat, #E3DACC);
+  border: 1.5px solid var(--clay, #D97757);
+  color: var(--clay, #D97757);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-pill, 999px);
+  cursor: pointer;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--t-fast, 120ms),
+    color var(--t-fast, 120ms),
+    border-color var(--t-fast, 120ms);
+}
+.exh-msg-send:hover {
+  background: var(--clay, #D97757);
+  color: var(--ivory, #FAF9F5);
+  border-color: var(--clay-d, #B85C3E);
+}
+
+/* When panel is collapsed, hide the input visually (it stays in the
+   DOM but becomes unreachable behind the slide). */
+.exh-msg-panel.is-collapsed .exh-msg-input { opacity: 0; pointer-events: none; }
+
+/* Send-confirmation flash, anchored bottom-right of the panel */
+.exh-msg-flash {
+  position: absolute;
+  right: 14px;
+  bottom: 64px;
+  background: var(--slate, #141413);
+  color: var(--ivory, #FAF9F5);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill, 999px);
+  box-shadow: 0 4px 12px rgba(20, 20, 19, 0.18);
+  transition: opacity 320ms, transform 320ms;
+  z-index: 5;
+}
+.exh-msg-flash.is-error { background: var(--clay, #D97757); }
+.exh-msg-flash.is-out { opacity: 0; transform: translateY(6px); }
+
+/* Panel needs to be a positioning context for the flash */
+.exh-msg-panel { position: fixed; }

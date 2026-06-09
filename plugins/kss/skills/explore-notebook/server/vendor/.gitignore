@@ -1,0 +1,4 @@
+# This skill ships vendored dependencies so it works offline with zero
+# build step. Override the repo-level `node_modules/` ignore here.
+!node_modules/
+!node_modules/**

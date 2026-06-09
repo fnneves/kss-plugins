@@ -1,5 +1,4 @@
 ---
-name: explore-html
 description: Build a single-file interactive HTML page to explore a topic, compare options, surface data visually, or manipulate state and export the result. Trigger whenever the user asks to "explore", "understand visually", "compare side-by-side", "play with the variables", "see the trade-offs", "visualize", asks for "a report", "a diagram", "diagrams", "a kanban board", "a triage board", "slides", "a deck", or wants to compare "code approaches", "implementation options", "code suggestions", or "candidate solutions". Also trigger when the user explicitly asks for an HTML page, an interactive page, "an explorer", or an editor (kanban, flag editor, prompt tuner) that exports back to markdown/JSON. Use this skill PROACTIVELY when the topic at hand is spatial, comparative, parameterised, or has more than one viable answer that benefits from being seen next to the others — even if the user did not explicitly request HTML. Always confirm format (HTML vs markdown) and destination path before drafting — see §2.
 ---
 

@@ -1,0 +1,233 @@
+/* ============================================================
+   feedback-widget.css — Editorial-system-compatible feedback UI
+   Token references resolve against colors_and_type.css.
+   ============================================================ */
+
+/* --- one-shot hint chip ------------------------------------ */
+.exh-hint {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483202;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 8px 12px;
+  background: var(--paper, #FFFFFF);
+  border: 1.5px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-pill, 999px);
+  box-shadow: 0 6px 20px rgba(20, 20, 19, 0.10);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 12.5px;
+  color: var(--fg-default, #3D3D3A);
+  transition: opacity 280ms, transform 280ms;
+}
+.exh-hint.is-out { opacity: 0; transform: translateY(8px); }
+.exh-hint-key {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  background: var(--pill-clay-bg);
+  border: 1px solid var(--pill-clay-bd);
+  color: var(--clay-d, #B85C3E);
+  border-radius: var(--r-xs, 4px);
+}
+.exh-hint-text { color: var(--fg-default, #3D3D3A); }
+.exh-hint-close {
+  background: none;
+  border: none;
+  color: var(--fg-muted, #87867F);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.exh-hint-close:hover { color: var(--fg-strong, #141413); }
+
+/* --- Alt-key hover affordance ------------------------------ */
+/* Highlight the element directly under the cursor when the user is
+   holding Alt — gives a feedforward signal that a click will pin. */
+body.exh-alt-down *:not(.exh-popover):not(.exh-popover *):not(.exh-hint):not(.exh-hint *):hover {
+  outline: 1.5px dashed var(--clay, #D97757);
+  outline-offset: 2px;
+  cursor: crosshair;
+}
+
+/* Persistent outline on the element whose popover is currently open.
+   Same dashed clay outline plus a subtle clay-tinted background so the
+   user can see at a glance what they're commenting on. */
+.exh-pin-active {
+  outline: 1.5px dashed var(--clay, #D97757) !important;
+  outline-offset: 2px;
+  background-color: var(--pill-clay-bg) !important;
+  transition: background-color 120ms var(--ease-out, ease);
+}
+
+/* --- popover ----------------------------------------------- */
+.exh-popover {
+  position: fixed;
+  width: 360px;
+  background: var(--paper, #FFFFFF);
+  border: 1.5px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-lg, 14px);
+  box-shadow: var(--sh-card-emph, 0 12px 32px rgba(20, 20, 19, 0.08));
+  font-family: var(--font-body, system-ui, sans-serif);
+  color: var(--fg-default, #3D3D3A);
+  z-index: 2147483201;
+  padding: 14px 14px 12px;
+  display: grid;
+  gap: 10px;
+}
+.exh-pop-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+}
+.exh-pop-eyebrow {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: var(--fs-eyebrow-tight, 11px);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-eyebrow, 0.08em);
+  color: var(--clay, #D97757);
+}
+.exh-pop-target {
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 12px;
+  color: var(--fg-strong, #141413);
+  background: var(--bg-soft, #F0EEE6);
+  padding: 2px 6px;
+  border-radius: var(--r-xs, 4px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.exh-pop-close {
+  background: none;
+  border: none;
+  color: var(--fg-muted, #87867F);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.exh-pop-close:hover { color: var(--fg-strong, #141413); }
+
+.exh-pop-quick {
+  display: flex;
+  gap: 6px;
+}
+.exh-pop-quick button {
+  flex: 1;
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 8px;
+  background: var(--paper, #FFFFFF);
+  color: var(--fg-default, #3D3D3A);
+  border: 1px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-pill, 999px);
+  cursor: pointer;
+  transition: all var(--t-fast, 120ms);
+}
+.exh-pop-quick button:hover { border-color: var(--slate, #141413); color: var(--slate, #141413); }
+.exh-pop-quick button[data-action="keep"].is-on    { background: var(--pill-olive-bg); border-color: var(--olive, #788C5D); color: var(--olive, #788C5D); }
+.exh-pop-quick button[data-action="remove"].is-on  { background: var(--pill-clay-bg);  border-color: var(--clay, #D97757);  color: var(--clay-d, #B85C3E); }
+.exh-pop-quick button[data-action="change"].is-on  { background: var(--pill-sky-bg);   border-color: var(--sky, #6A8CAF);   color: var(--sky, #6A8CAF); }
+
+.exh-pop-text {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: var(--ivory, #FAF9F5);
+  border: 1px solid var(--bd-hair, #D1CFC5);
+  border-radius: var(--r-sm, 6px);
+  color: var(--fg-strong, #141413);
+  box-sizing: border-box;
+}
+.exh-pop-text:focus { outline: 2px solid var(--pill-sky-bd); outline-offset: -1px; border-color: var(--sky, #6A8CAF); }
+
+.exh-pop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.exh-pop-hint {
+  font-family: var(--font-eyebrow, ui-monospace, monospace);
+  font-size: 10.5px;
+  color: var(--fg-muted, #87867F);
+  letter-spacing: 0.04em;
+}
+.exh-pop-submit {
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  background: var(--slate, #141413);
+  color: var(--ivory, #FAF9F5);
+  border: 1.5px solid var(--slate, #141413);
+  border-radius: var(--r-pill, 999px);
+  cursor: pointer;
+  transition: transform var(--t-fast, 120ms);
+}
+.exh-pop-submit:hover { transform: translateY(-1px); }
+
+/* --- pin markers on commented elements --------------------- */
+/* Uses inline SVG icons so glyph rendering is OS/font-independent. */
+.exh-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  vertical-align: middle;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition:
+    transform var(--t-fast, 120ms) var(--ease-out, ease),
+    box-shadow var(--t-fast, 120ms) var(--ease-out, ease);
+}
+.exh-pin:hover {
+  transform: scale(1.18);
+  box-shadow: 0 2px 6px rgba(20, 20, 19, 0.18);
+}
+.exh-pin > svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  /* Stroke + fill both inherit currentColor; the .exh-pin-* classes
+     below set that color. Per-icon stroke/fill overrides are baked
+     into the SVG path attributes. */
+}
+.exh-pin-keep    { color: var(--olive, #788C5D); border-color: var(--olive, #788C5D); background: var(--pill-olive-bg); }
+.exh-pin-remove  { color: var(--clay-d, #B85C3E); border-color: var(--clay, #D97757); background: var(--pill-clay-bg); }
+.exh-pin-change  { color: var(--sky, #6A8CAF); border-color: var(--sky, #6A8CAF); background: var(--pill-sky-bg); }
+.exh-pin-comment { color: var(--clay, #D97757); border-color: var(--clay, #D97757); background: var(--paper, #fff); }
+
+/* --- toast ------------------------------------------------- */
+.exh-toast {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  z-index: 2147483210;
+  background: var(--slate, #141413);
+  color: var(--ivory, #FAF9F5);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill, 999px);
+  box-shadow: 0 6px 16px rgba(20, 20, 19, 0.18);
+  transition: opacity 400ms, transform 400ms;
+}
+.exh-toast.is-error { background: var(--clay, #D97757); }
+.exh-toast.is-out   { opacity: 0; transform: translateY(8px); }

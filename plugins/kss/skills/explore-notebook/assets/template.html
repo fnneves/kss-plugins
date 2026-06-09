@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<!--
+  Editorial HTML Design System — starting skeleton.
+  Both stylesheets live in this assets/ directory; the agent should
+  copy them next to the produced HTML (or inline them for a /tmp/
+  throwaway). Tokens come from colors_and_type.css; composition
+  primitives come from components.css. Do not re-define either.
+
+  Lift this skeleton; do not preserve as-is — adapt the sections,
+  cards, and content to the specific topic.
+-->
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header style="margin-bottom: 24px;">
+    <div class="eyebrow">{{EYEBROW — e.g. "Phase 1.3 design exploration"}}</div>
+    <h1>{{TITLE_WITH_ITALIC_EMPHASIS — use <em>for the key word</em>}}</h1>
+    <p class="lead">{{ONE_TO_TWO_SENTENCE_THESIS}}</p>
+    <nav class="toc">
+      <a href="#a">First section <span class="n">01</span></a>
+      <a href="#b">Second section <span class="n">02</span></a>
+    </nav>
+  </header>
+
+  <hr class="rule" />
+
+  <section id="a">
+    <div class="sec-head">
+      <span class="idx">01</span>
+      <h2>First section</h2>
+      <span class="count">3 items</span>
+    </div>
+    <p class="sec-intro">A one-paragraph framing. Tells the reader what this section delivers, why it's here, and what they'll be able to do after reading it.</p>
+
+    <!-- Three equal-weight cards (Exploration & Planning pattern) -->
+    <div class="grid-3">
+      <div class="card">
+        <h4>Eyebrow label</h4>
+        <h3>Card title</h3>
+        <p>Body content — short paragraph, parallel structure with siblings.</p>
+      </div>
+      <div class="card">
+        <h4>Eyebrow label</h4>
+        <h3>Card title</h3>
+        <p>Body content.</p>
+      </div>
+      <div class="card card-rec">
+        <h4>Eyebrow label</h4>
+        <h3>Card title</h3>
+        <p>The "Recommended" variant — clay border + tag badge above-left.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="b">
+    <div class="sec-head">
+      <span class="idx">02</span>
+      <h2>Second section</h2>
+    </div>
+    <p class="sec-intro">Continuation.</p>
+
+    <!-- Example: finding callout + verdict + scoreline + compare-row -->
+    <div class="finding">
+      <h4>1 — A non-obvious finding worth surfacing</h4>
+      <p>One short paragraph. The most important things go in <code>.finding</code> blocks near the top of the page.</p>
+    </div>
+
+    <div class="verdict is-pass">
+      <h4>Predicate fires → canonical_key_match: 1.0</h4>
+      <p class="verdict-summary">A summary of why.</p>
+    </div>
+
+    <div class="scoreline">
+      <span>Some component</span>
+      <strong>+0.50</strong>
+    </div>
+    <div class="scoreline total">
+      <span>Final score</span>
+      <strong>0.775</strong>
+    </div>
+
+    <div class="compare-row">
+      <div class="lhs">
+        <h4>Before</h4>
+        <p>What the current state is.</p>
+      </div>
+      <div class="rhs">
+        <h4>After</h4>
+        <p>What the change would produce.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="k">{{closing_italic_remark}}</span>
+    <span>{{timestamp_or_source_note}}</span>
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     DATA BOOTSTRAP — see references/real-data.md
+     ============================================================ -->
+<script>
+  // INLINE pattern (small datasets):
+  const DATA = { /* ... */ };
+  // SIDECAR pattern (large datasets) — define window.SNAPSHOT via:
+  //   <script src="snapshot.js"></script>
+</script>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+// Tabs (when using pill TOC as anchor-style tabs):
+document.querySelectorAll("nav.toc a[data-tab]").forEach(a => {
+  a.onclick = e => {
+    e.preventDefault();
+    document.querySelectorAll("nav.toc a").forEach(t => t.classList.remove("is-active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("is-active"));
+    a.classList.add("is-active");
+    $("panel-" + a.dataset.tab).classList.add("is-active");
+  };
+});
+// Toggle buttons with .is-on:
+document.querySelectorAll("button[data-toggle]").forEach(b => {
+  b.onclick = () => { b.classList.toggle("is-on"); if (typeof recompute === "function") recompute(); };
+});
+</script>
+
+</body>
+</html>

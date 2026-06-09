@@ -8,6 +8,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each pl
 
 ## kss
 
+### [0.3.0] - 2026-06-09
+
+**Skills added:**
+- `explore-notebook` — a *served*, interactive HTML notebook (Utilities layer); the iterate-over-many-rounds sibling of `explore-html`. Ships a bundled stdlib `serve.py` providing live-reload over SSE, a real LAN-reachable HTTP URL, and a two-way feedback surface: Alt-click element pins, an always-on chat panel, agent markdown replies (`reply.py`), and click-to-open articles (`article.py`). Markdown is rendered server-side via a vendored `markdown-it` tree (~2MB) so the skill works offline with no build step. Eight category references (exploration, research, reports, code-review, pr-writeup, implementation-plan, custom-editor, illustrations) plus interactive references (replies-and-articles, interactive-gotchas). Use `explore-html` for one-shot static pages; reach for `explore-notebook` when the work is iteration- or feedback-driven, or the page must be opened from another device.
+
+**Adapted for plugin distribution:**
+- Server-launch commands in `SKILL.md` and `references/replies-and-articles.md` now resolve via `$CLAUDE_PLUGIN_ROOT/skills/explore-notebook/server/…` instead of a hardcoded `~/.claude/skills/…` path, so the skill works when installed from the marketplace.
+- Diagram guidance now points at the sibling `explore-html` skill's `references/diagrams.md` (the diagram playbook for the `explore-*` family) rather than an external `diagram-design` skill that isn't part of this plugin.
+- Planning-workflow framing (was "GSD owns PLAN.md") reworded to kss terms (`plan-milestone`), kept graceful for non-kss repos.
+
+**Layers:** Setup (2) · Lifecycle (3) · Session (3) · Knowledge (2) · Meta (1) · Utilities (2). Total 13 skills.
+
+**Removed:**
+- The gitignored in-repo `.claude/skills/` dogfood copy of `explore-html` — a stale duplicate of the plugin source and a drift hazard. Dogfood by installing this repo as a local marketplace instead. The `.gitignore` guard line is retained.
+
+**Known gaps:**
+- The HTML explainers under `plugins/kss/explainers/` still depict 12 skills / "Utilities (1)" and do not yet include `explore-notebook`. Regeneration of `01-kss-in-6-slides.html`, `03-skills-interaction.html`, and `index.html` is pending. The root README's explainer descriptions track that pending state.
+
 ### [0.2.0] - 2026-05-11
 
 **Skills added:**

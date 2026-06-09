@@ -7,3 +7,8 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/skills/
+proposals/
+
+# Python bytecode (explore-notebook's server scripts generate these at runtime)
+__pycache__/
+*.py[cod]

@@ -24,6 +24,7 @@ All state lives under `.kss/` at the project root.
 | `/kss:distill` | Knowledge | Extract durable insights from LOG + notes into CANONICAL-KB. Surfaces vocabulary candidates for VOCABULARY.md. |
 | `/kss:skill-autopsy` | Meta | Log a short report when a skill underperformed, or analyze accumulated reports to propose SKILL.md improvements. |
 | `/kss:explore-html` | Utilities | Build a single-file interactive HTML page for exploration, comparison, reports, diagrams, slide decks, or drag-and-drop editors. Confirms format (HTML vs markdown) and destination path before drafting. |
+| `/kss:explore-notebook` | Utilities | Build a *served* interactive HTML notebook — live-reload, a real LAN-reachable URL, and a two-way feedback surface (Alt-click element pins, chat panel, agent markdown replies, click-to-open articles). The iterate-over-many-rounds sibling of `explore-html`; ships a bundled `serve.py`. |
 
 ## Which skill when
 
@@ -54,6 +55,7 @@ flowchart TD
     Work --> W5["Milestone shipped<br/>→ /kss:complete-milestone<br/><i>close milestone, write SUMMARY.md</i>"]
     Work --> W6["Ending session<br/>→ /kss:wrap-up<br/><i>append LOG entry + update STATE</i>"]
     Work --> W7["Need a visual/interactive artifact<br/>→ /kss:explore-html<br/><i>HTML page: reports, diagrams, slides, side-by-side, kanban</i>"]
+    Work --> W8["Iterate on a served dashboard / control room<br/>→ /kss:explore-notebook<br/><i>live-reload + LAN URL + click-to-feedback</i>"]
 ```
 
 Edge cases not in the diagram: rerun `map-codebase` after a major refactor, `complete-milestone --archive-topic` to archive the whole topic, and `skill-autopsy --consolidate` to analyze accumulated reports.
@@ -69,6 +71,7 @@ per session:         /kss:start-session → (work) → /kss:wrap-up
                               /kss:capture (anytime), /kss:distill (periodically)
                               /kss:spike (when exploring)
                               /kss:explore-html (when an HTML artifact would beat markdown)
+                              /kss:explore-notebook (when you'll iterate on a served page over rounds)
                               /kss:skill-autopsy <skill> (after a frustration)
 ```
 
