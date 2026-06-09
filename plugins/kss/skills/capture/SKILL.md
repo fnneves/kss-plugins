@@ -10,7 +10,7 @@ Lightweight idea-drop. Use any time during a session. Three modes — seed, idea
 
 1. **Refuse if `.kss/` is missing.**
 
-2. **Soft-fail if no active topic** in `.kss/STATE.md`.
+2. **Soft-fail if no active topic** — read `active_topic` from `.kss/PROJECT.md` frontmatter. If it's `null`:
    - Ask: "No active topic. Which topic should this go to? (list available, or `--project-level` to capture into PROJECT.md scratch)"
 
 ## Inputs

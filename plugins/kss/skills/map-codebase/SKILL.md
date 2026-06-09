@@ -12,7 +12,7 @@ Produces a compact codebase snapshot under `.kss/codebase/`. Four files: what it
    - Tell the user: "`.kss/` not found. Run `scaffold-project` first."
 
 2. **Warn (don't refuse) if STACK/STRUCTURE/CONVENTIONS already exist.**
-   - "Existing STACK / STRUCTURE / CONVENTIONS files will be overwritten. VOCABULARY will be merged (existing terms preserved). Continue?"
+   - "Existing STACK / STRUCTURE / CONVENTIONS bodies will be overwritten. Any `## Learned` section in STRUCTURE / CONVENTIONS is preserved verbatim. VOCABULARY will be merged (existing terms preserved). Continue?"
 
 ## Process
 
@@ -23,9 +23,21 @@ Produces a compact codebase snapshot under `.kss/codebase/`. Four files: what it
    - Sample a few representative source files per top-level dir to understand patterns.
    - Read existing `README.md`, `BOOTSTRAP.md`, `CLAUDE.md` if present.
 
-2. **Write STACK / STRUCTURE / CONVENTIONS** using the templates below. These files overwrite freely on every run.
+2. **⚠ BEFORE overwriting STRUCTURE.md / CONVENTIONS.md, rescue any `## Learned` fence.** `distill` appends durable patterns and structure facts under a section titled **exactly**:
 
-3. **Scan for vocabulary seeds.** Look for domain terms — names of concepts the team uses, not implementation details:
+   `## Learned (append-only — preserved across map-codebase runs)`
+
+   This section is **user/distill-owned content that this skill must never destroy.** For *each* of STRUCTURE.md and CONVENTIONS.md, if it already exists:
+   - Read it and locate that `## Learned (append-only — preserved across map-codebase runs)` heading.
+   - **Capture everything from that heading to the end of the file verbatim** (the heading line + all entries below it), stopping before any trailing `*Refreshed by map-codebase on ...*` footer line.
+   - Hold it aside. You will re-append it in step 3.
+   - If no such heading exists, there is nothing to rescue — proceed.
+
+   This is the same append-only discipline applied to VOCABULARY.md (step 5) — STRUCTURE/CONVENTIONS bodies regenerate, but the `## Learned` fence is carried across runs untouched.
+
+3. **Write STACK / STRUCTURE / CONVENTIONS** using the templates below. The auto-generated **bodies** overwrite freely on every run. Then, for STRUCTURE.md and CONVENTIONS.md, **re-append the rescued `## Learned (append-only — preserved across map-codebase runs)` section verbatim at the bottom** (above the `*Refreshed by map-codebase*` footer). Do not regenerate, reorder, dedupe, or reword its entries — paste them back exactly as captured. If nothing was rescued, omit the section (distill will lazy-create it later).
+
+4. **Scan for vocabulary seeds.** Look for domain terms — names of concepts the team uses, not implementation details:
    - README glossary section if present.
    - Top-level domain entities — names of central models, types, status enums, state machines.
    - Comments that *define* terms (e.g., `// Materialization: when a draft section becomes published`).
@@ -33,16 +45,16 @@ Produces a compact codebase snapshot under `.kss/codebase/`. Four files: what it
 
    Skip implementation names like `publishLessonAsync`. Capture the noun-level concept the user would naturally say.
 
-4. **Write or merge VOCABULARY.md** using the template below. **Merge semantics — never overwrite:**
+5. **Write or merge VOCABULARY.md** using the template below. **Merge semantics — never overwrite:**
    - If the file doesn't exist → create it with the auto-detected terms, each marked `**Source:** auto-scan (verify)`.
    - If the file exists → preserve every existing term verbatim. Only add terms that are not already present (case-insensitive match on the term header).
    - If auto-scan finds nothing new and the file already exists → leave it untouched, just bump `last_updated`.
    - Never edit, reword, or remove existing entries. The user owns curated terms.
 
-5. **Tell the user.**
-   - "Codebase map written to `.kss/codebase/`. STACK / STRUCTURE / CONVENTIONS overwritten. VOCABULARY: {N} new terms added, {M} existing preserved."
+6. **Tell the user.**
+   - "Codebase map written to `.kss/codebase/`. STACK / STRUCTURE / CONVENTIONS bodies regenerated; `## Learned` sections preserved. VOCABULARY: {N} new terms added, {M} existing preserved."
 
-6. **Do not commit.**
+7. **Do not commit.**
 
 ## Template: `.kss/codebase/STACK.md`
 
@@ -114,6 +126,8 @@ last_updated: {YYYY-MM-DD}
 |---|---|
 | `{file}` | {what it tracks} |
 
+{If a `## Learned (append-only — preserved across map-codebase runs)` section was rescued in step 2, re-append it verbatim here, immediately above the footer.}
+
 ---
 *Refreshed by map-codebase on {YYYY-MM-DD}*
 ```
@@ -148,6 +162,8 @@ last_updated: {YYYY-MM-DD}
 ## Anti-patterns to avoid
 
 - {things that look reasonable but break something here}
+
+{If a `## Learned (append-only — preserved across map-codebase runs)` section was rescued in step 2, re-append it verbatim here, immediately above the footer.}
 
 ---
 *Refreshed by map-codebase on {YYYY-MM-DD}*
@@ -186,3 +202,4 @@ Four files written under `.kss/codebase/`. Each with frontmatter `last_updated` 
 - Prefer concrete over abstract: "tests use pytest with `asyncio_mode = auto` (config at `stratkit/pytest.ini`)" beats "tests are async".
 - **VOCABULARY.md is the only file in this folder that lives across runs.** Treat it as a shared document, not a generated one. Auto-scan only seeds and adds — it never edits or removes entries the user has touched.
 - VOCABULARY captures *domain* terms, not *implementation* names. "Materialization cascade" yes; `publishLessonAsync()` no.
+- **Never destroy a `## Learned` fence.** STRUCTURE.md and CONVENTIONS.md may carry a `## Learned (append-only — preserved across map-codebase runs)` section written by `distill`. Their auto-generated bodies regenerate every run, but that section is **off-limits** — rescue it before overwriting (step 2) and re-append it verbatim after (step 3). Match the heading string byte-for-byte; if you regenerate the body and drop the fence, you silently delete distilled knowledge. Same append-only contract as VOCABULARY.

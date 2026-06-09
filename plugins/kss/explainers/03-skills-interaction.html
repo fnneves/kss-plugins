@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How the 12 skills interact — kss explainer</title>
+<title>How the 13 skills interact — kss explainer</title>
 <style>
   :root {
     --ivory:  #FAF9F5;
@@ -364,7 +364,7 @@
 
   <header>
     <div class="eyebrow">kss explainer · 03 · skills interaction</div>
-    <h1>How the 12 skills <em>interact</em>.</h1>
+    <h1>How the 13 skills <em>interact</em>.</h1>
     <p class="lead">
       Lifecycle ordering is one lens — the README mermaid covers that. This page shows the other lens: <strong>data ownership</strong>. Which skill writes which file. Which skill reads it. Where the loops close. Click any skill to see what it writes, what it reads, when to invoke it, and which failure mode it prevents.
     </p>
@@ -483,13 +483,18 @@
       <div class="layer-row" data-layer="utilities">
         <div class="layer-label">
           <div class="layer-name">Utilities</div>
-          <div class="layer-count">1 skill</div>
+          <div class="layer-count">2 skills</div>
         </div>
         <div class="layer-skills">
           <button class="skill-card" data-k="explore-html" data-layer="utilities">
             <div class="sk-stripe"></div>
             <div class="sk-name">explore-html</div>
             <div class="sk-gloss">Build one-off HTML artifacts — reports, diagrams, slides, comparisons, kanban editors.</div>
+          </button>
+          <button class="skill-card" data-k="explore-notebook" data-layer="utilities">
+            <div class="sk-stripe"></div>
+            <div class="sk-name">explore-notebook</div>
+            <div class="sk-gloss">Build a <em>served</em> HTML notebook — live-reload, LAN URL, click-to-feedback. The iterate-over-rounds sibling of explore-html.</div>
           </button>
         </div>
       </div>
@@ -506,7 +511,7 @@
 
   <footer>
     <span class="k">Lifecycle is the spine. Data is the connective tissue.</span>
-    <span>kss v0.2.0 · 12 skills · 6 layers</span>
+    <span>kss v0.4.0 · 13 skills · 6 layers</span>
   </footer>
 
 </div>
@@ -520,191 +525,229 @@ const SKILLS = {
     invoke: '/kss:scaffold-project',
     when: 'Once per project, before anything else. Creates the bare `.kss/` shell so other skills have something to read and write.',
     writes: [
-      '.kss/PROJECT.md',
-      '.kss/STATE.md (empty pointer)',
+      '.kss/PROJECT.md (frontmatter: active_topic=null, last_session)',
       '.kss/CANONICAL-KB.md (empty)',
       '.kss/codebase/ (folder)',
       '.kss/topics/ (folder)',
-      '.kss/spikes/ (folder)',
-      '.kss/archive/ (folder)'
+      '.kss/spikes/ (folder)'
     ],
-    reads: ['(none — fresh start)'],
-    feeds: ['map-codebase', 'new-topic', 'capture', 'start-session'],
+    reads: ['(none — fresh start; refuses if .kss/ exists)'],
+    feeds: ['map-codebase', 'new-topic', 'capture', 'start-session', 'distill'],
     fedBy: [],
-    prevents: 'Inconsistent .kss/ shape across projects. Every kss-managed project starts with the same skeleton.'
+    prevents: 'Inconsistent .kss/ shape across projects. Every kss-managed project starts with the same skeleton — one PROJECT.md pointer, no project-level STATE.md.'
   },
   'map-codebase': {
     layer: 'setup',
     invoke: '/kss:map-codebase',
-    when: 'Once per project after scaffold. Rerun after major refactors. STACK/STRUCTURE/CONVENTIONS overwrite; VOCABULARY is append-only across runs.',
+    when: 'Once per project after scaffold. Rerun after major refactors. STACK/STRUCTURE/CONVENTIONS bodies overwrite; VOCABULARY and the `## Learned` fences are preserved across runs.',
     writes: [
-      '.kss/codebase/STACK.md (overwrite)',
-      '.kss/codebase/STRUCTURE.md (overwrite)',
-      '.kss/codebase/CONVENTIONS.md (overwrite)',
-      '.kss/codebase/VOCABULARY.md (seed; append-only after)'
+      '.kss/codebase/STACK.md (body overwrite)',
+      '.kss/codebase/STRUCTURE.md (body overwrite; `## Learned` fence rescued + re-appended)',
+      '.kss/codebase/CONVENTIONS.md (body overwrite; `## Learned` fence rescued + re-appended)',
+      '.kss/codebase/VOCABULARY.md (seed; merge-only, existing terms kept)'
     ],
-    reads: ['The codebase itself.'],
+    reads: [
+      'The codebase itself (package files, dirs, sample sources)',
+      'existing STRUCTURE/CONVENTIONS `## Learned` fences (to preserve)'
+    ],
     feeds: ['plan-milestone', 'start-session', 'distill'],
     fedBy: ['scaffold-project'],
-    prevents: 'Re-deriving codebase shape every session. Domain vocabulary drift between sessions.'
+    prevents: 'Re-deriving codebase shape every session. Vocabulary drift. Silently wiping distill\'s `## Learned` facts on a remap.'
   },
   'new-topic': {
     layer: 'lifecycle',
     invoke: '/kss:new-topic',
-    when: 'When starting work unrelated to the current active topic. Topics isolate work tracks so logs don\'t cross-contaminate.',
+    when: 'When starting work unrelated to the current active topic. Topics isolate work tracks so logs don\'t cross-contaminate. Offers activation (default: keep current) rather than forcing the switch.',
     writes: [
-      '.kss/topics/<slug>/TOPIC.md',
-      '.kss/topics/<slug>/STATE.md',
+      '.kss/topics/<slug>/TOPIC.md (status: active)',
+      '.kss/topics/<slug>/STATE.md (active_milestone: null — the milestone source of truth)',
       '.kss/topics/<slug>/LOG.md (empty)',
       '.kss/topics/<slug>/SEEDS.md (empty)',
       '.kss/topics/<slug>/MILESTONES.md (empty)',
-      '.kss/STATE.md (updates active-topic pointer)'
+      '.kss/PROJECT.md (`## Topics` row; active_topic set ONLY if activated; Carryover rows struck when claimed)'
     ],
-    reads: ['.kss/STATE.md', '.kss/PROJECT.md'],
+    reads: [
+      '.kss/PROJECT.md (active_topic + `## Carryover` handoffs to claim)',
+      'optional spike README.md (--from-spike)'
+    ],
     feeds: ['plan-milestone', 'start-session', 'capture'],
-    fedBy: ['scaffold-project', 'complete-milestone'],
-    prevents: 'Mixing unrelated work into one topic LOG. Two simultaneous tracks compete for context.'
+    fedBy: ['scaffold-project', 'complete-milestone', 'spike'],
+    prevents: 'Mixing unrelated work into one topic LOG. Cross-topic handoffs (Carryover) evaporating instead of being claimed into the right new track.'
   },
   'plan-milestone': {
     layer: 'lifecycle',
     invoke: '/kss:plan-milestone',
-    when: 'When scoping a finite chunk inside the active topic. Adaptive — discusses scope first if fuzzy, plans directly if not.',
+    when: 'When scoping a finite chunk inside the active topic. Adaptive — discusses scope first if fuzzy, plans directly if not. `--topic <slug>` plans a parallel track without moving the active pointer.',
     writes: [
       '.kss/topics/<topic>/milestones/<v>-<slug>/PLAN.md',
-      '.kss/STATE.md (active-milestone pointer)'
+      '.kss/topics/<topic>/STATE.md (active_milestone: <v>-<slug> — the single source of truth)'
     ],
     reads: [
-      '.kss/topics/<topic>/TOPIC.md',
-      '.kss/codebase/STRUCTURE.md',
-      '.kss/codebase/CONVENTIONS.md'
+      '.kss/topics/<topic>/TOPIC.md (Goal, Success Bar, Out of Scope)',
+      '.kss/topics/<topic>/MILESTONES.md (what shipped)',
+      '.kss/codebase/STRUCTURE.md & CONVENTIONS.md',
+      'optional spike README.md (--from-spike)'
     ],
     feeds: ['start-session', 'complete-milestone'],
-    fedBy: ['new-topic', 'map-codebase'],
-    prevents: 'Over-scoped milestones; "drift" mid-execution because no anchored plan exists.'
+    fedBy: ['new-topic', 'map-codebase', 'spike'],
+    prevents: 'Over-scoped milestones; "drift" mid-execution because no anchored plan exists. Never touches the project-level pointer — there is none for milestones.'
   },
   'complete-milestone': {
     layer: 'lifecycle',
     invoke: '/kss:complete-milestone',
-    when: 'When the active milestone has shipped (or been abandoned). Use `--archive-topic` to retire the whole topic at the same time.',
+    when: 'When the active milestone has shipped (or been abandoned). Offers to archive the whole topic when it\'s done (default: keep); `--archive-topic` is a shortcut to that confirm.',
     writes: [
-      '.kss/topics/<topic>/milestones/<v>-<slug>/SUMMARY.md',
+      '.kss/topics/<topic>/milestones/<v>-<slug>/SUMMARY.md (the shipped marker)',
       '.kss/topics/<topic>/MILESTONES.md (append, newest-on-top)',
-      '.kss/STATE.md (clears milestone pointer)'
+      '.kss/topics/<topic>/STATE.md (active_milestone: null)',
+      '.kss/PROJECT.md `## Carryover` (cross-topic handoffs, trigger-gated)',
+      'on archive: TOPIC.md status: archived + PROJECT.md row → `## Archived Topics` + active_topic: null'
     ],
     reads: [
-      'PLAN.md',
-      '.kss/topics/<topic>/LOG.md (recent entries)',
-      'spike findings if relevant'
+      'active PLAN.md (goal, success criteria, tasks)',
+      '.kss/topics/<topic>/TOPIC.md, STATE.md, MILESTONES.md'
     ],
-    feeds: ['new-topic'],
+    feeds: ['new-topic', 'distill'],
     fedBy: ['plan-milestone', 'wrap-up', 'spike'],
-    prevents: 'Milestones bleeding into each other. No durable record of what shipped vs. what slipped.'
+    prevents: 'Milestones bleeding into each other. Lost record of shipped vs. slipped. Deferred-to-future-topic items vanishing instead of landing in Carryover. Archived topics polluting active listings — status flag, no folder move.'
   },
   'start-session': {
     layer: 'session',
     invoke: '/kss:start-session',
-    when: 'At the start of every coding session. Read-only — loads context, never writes state.',
-    writes: ['(no files — pure context load)'],
-    reads: [
-      '.kss/STATE.md (active pointers)',
-      '.kss/topics/<topic>/STATE.md',
-      '.kss/topics/<topic>/LOG.md (recent entries)',
-      'active PLAN.md',
-      '.kss/codebase/* (for orientation)'
+    when: 'At the start of every coding session. Near read-only — loads context. Reads the PROJECT.md pointer, derives the milestone from the topic\'s STATE.md, re-verifies transient Scratch facts, and migrates any legacy .kss/STATE.md on first run.',
+    writes: [
+      '.kss/PROJECT.md (bump last_session)',
+      '.kss/topics/<topic>/STATE.md `## Scratch` (re-verify: refresh or clear transient facts)',
+      'one-time: deletes legacy .kss/STATE.md after migrating its active_topic into PROJECT.md'
     ],
-    feeds: ['wrap-up', 'spike', 'capture', 'explore-html'],
+    reads: [
+      '.kss/PROJECT.md frontmatter → active_topic (the single project pointer)',
+      '.kss/topics/<topic>/STATE.md → active_milestone (derived) + focus, blockers, Scratch',
+      'active PLAN.md (open tasks)',
+      '.kss/topics/<topic>/LOG.md (last ~5 entries)',
+      'SEEDS.md (surface triggered seeds)'
+    ],
+    feeds: ['wrap-up', 'spike', 'capture', 'explore-html', 'explore-notebook'],
     fedBy: ['scaffold-project', 'map-codebase', 'new-topic', 'plan-milestone', 'wrap-up'],
-    prevents: 'Cold starts where you re-derive "where was I" from git log + memory. Lost continuity between sessions.'
+    prevents: 'Cold starts where you re-derive "where was I" from git log + memory. Re-asserting yesterday\'s env state as today\'s — Scratch facts are re-verified, never parroted.'
   },
   'spike': {
     layer: 'session',
     invoke: '/kss:spike',
-    when: 'Mid-session when an idea needs testing before commitment. Throwaway by design — produces a verdict, not production code.',
+    when: 'Mid-session when an idea needs testing before commitment. Throwaway by design — produces a verdict (yes/no/pivot), not production code.',
     writes: [
-      '.kss/spikes/YYYYMMDD-<slug>/README.md (question, approach, findings, verdict)'
+      '.kss/spikes/YYYYMMDD-<slug>/README.md (question, approach, findings, verdict)',
+      'optional scratch files inside the spike folder'
     ],
-    reads: ['(none — independent exploration)'],
-    feeds: ['distill', 'complete-milestone'],
-    fedBy: ['start-session'],
-    prevents: 'Carrying unverified ideas into PLAN.md. Sunk-cost commitment to approaches that don\'t actually work.'
+    reads: ['(none — independent exploration; folder stays forever as the record)'],
+    feeds: ['plan-milestone', 'new-topic', 'complete-milestone', 'distill'],
+    fedBy: [],
+    prevents: 'Carrying unverified ideas into PLAN.md. Sunk-cost commitment to approaches that don\'t actually work. A spike left `pending` forever.'
   },
   'wrap-up': {
     layer: 'session',
     invoke: '/kss:wrap-up',
-    when: 'At the end of every coding session. Always — even if nothing shipped, you want the LOG entry.',
+    when: 'At the end of every coding session. Always — even if nothing shipped, you want the LOG entry. Offers to close the milestone when all tasks land done (default No).',
     writes: [
       '.kss/topics/<topic>/LOG.md (append entry, newest-on-top)',
-      '.kss/topics/<topic>/STATE.md (refresh focus + blockers)',
-      'optional .kss/topics/<topic>/milestones/<v>/note-YYYYMMDD-*.md'
+      '.kss/topics/<topic>/STATE.md (refresh Current Position + Blockers; transient env facts → `## Scratch` fence; bump status to executing)',
+      '.kss/PROJECT.md (bump last_session)',
+      'optional note-YYYYMMDD-*.md in the active milestone folder',
+      'optional PLAN.md task-status updates; optional TOPIC.md Key Decisions row'
     ],
-    reads: ['Session activity in your head + recent edits.'],
+    reads: [
+      'active PLAN.md (task table)',
+      'topic STATE.md (to refresh)'
+    ],
     feeds: ['start-session', 'distill', 'complete-milestone'],
     fedBy: ['start-session'],
-    prevents: 'Forgetting where you left off. LOG.md going stale and useless. State files drifting from reality.'
+    prevents: 'Forgetting where you left off. LOG.md going stale. Transient env state (ports, "is down", last-write times) rotting inside durable Blockers instead of the wipeable Scratch fence.'
   },
   'capture': {
     layer: 'knowledge',
     invoke: '/kss:capture',
-    when: 'Anytime — a seed, idea, or scratch note crosses your mind. Drop it before flow breaks. Seeds require trigger conditions; capture refuses seeds without them.',
+    when: 'Anytime — a seed, idea, or scratch note crosses your mind. Drop it before flow breaks. Seeds require a trigger condition; capture refuses seeds without one.',
     writes: [
-      '.kss/topics/<topic>/SEEDS.md (seeds with triggers)',
-      'scratch notes (free-form)'
+      '.kss/topics/<topic>/SEEDS.md (seeds — every row carries a mandatory trigger)',
+      '.kss/topics/<topic>/LOG.md (ideas, or a bottom `## Scratch` section)',
+      'rarely: PROJECT.md scratch (--project-level)'
     ],
-    reads: ['(none)'],
+    reads: ['.kss/PROJECT.md (active_topic; asks which topic if null)'],
     feeds: ['distill'],
     fedBy: ['scaffold-project', 'new-topic', 'start-session'],
-    prevents: 'Ideas evaporating between sessions. Seeds without triggers (which rot — capture refuses them).'
+    prevents: 'Ideas evaporating between sessions. Triggerless seeds (which rot — capture refuses them).'
   },
   'distill': {
     layer: 'knowledge',
     invoke: '/kss:distill',
-    when: 'Periodically — when LOG.md and notes have accumulated and a pattern is emerging. The rot-prevention pass.',
+    when: 'Periodically — when LOG.md and notes have accumulated and a pattern is emerging. Best run just before complete-milestone. The rot-prevention pass.',
     writes: [
-      '.kss/CANONICAL-KB.md (append insights)',
-      '.kss/codebase/VOCABULARY.md (append candidates)'
+      '.kss/CANONICAL-KB.md (learnings → Insights, vendor gotchas → Gotchas)',
+      '.kss/codebase/STRUCTURE.md `## Learned` fence (where-X-lives facts)',
+      '.kss/codebase/CONVENTIONS.md `## Learned` fence (patterns, anti-patterns)',
+      '.kss/codebase/VOCABULARY.md (domain terms — append-only)'
     ],
     reads: [
-      'LOG.md',
-      'SEEDS.md',
-      'recent notes',
-      'recent spikes',
-      'milestone SUMMARY.md files'
+      'topic LOG.md entries in scope',
+      'milestone note-*.md files',
+      'TOPIC.md Key Decisions (to avoid double-recording)',
+      'existing CANONICAL-KB / VOCABULARY / `## Learned` fences (to skip dupes)'
     ],
     feeds: [],
-    fedBy: ['wrap-up', 'capture', 'spike', 'map-codebase'],
-    prevents: 'Knowledge rotting in scattered notes. Vocabulary drift between codebase changes and your mental model.'
+    fedBy: ['wrap-up', 'capture', 'spike', 'map-codebase', 'scaffold-project', 'complete-milestone'],
+    prevents: 'Knowledge rotting in scattered notes. Insights dumped into one catch-all file — four destinations, never crossed: KB for prose, STRUCTURE/CONVENTIONS for codebase facts, VOCABULARY for terms.'
   },
   'skill-autopsy': {
     layer: 'meta',
     invoke: '/kss:skill-autopsy <skill-name>',
-    when: 'After a frustration with a specific skill. Two modes: log a single report, or consolidate accumulated reports into a SKILL.md diff (4+ reports).',
+    when: 'After a frustration with a specific skill. Two modes: log a single report, or (4+ reports) consolidate accumulated reports into a concrete SKILL.md diff. Never automatic.',
     writes: [
       '~/kss-skill-reports/<skill>.md (logging mode — personal, never committed)',
-      'diff against the skill\'s SKILL.md (consolidate mode)'
+      'consolidate + ~/.kss-source set: applies the diff to <source>/skills/<skill>/SKILL.md, clears reports',
+      'consolidate + no source: prints the diff for manual handling'
     ],
     reads: [
       'Previous reports for the named skill',
-      'The skill\'s SKILL.md (during consolidate)'
+      'The skill\'s live SKILL.md (during consolidate)',
+      '~/.kss-source (optional — only gates whether the diff is applied)'
     ],
     feeds: [],
     fedBy: [],
-    prevents: 'The same friction recurring forever with no path to fix the skill. Rigid skills that nobody bothers to improve.'
+    prevents: 'The same friction recurring forever with no path to fix the skill. Fabricated improvements — autopsy says "nothing to change yet" when reports share no root cause.'
   },
   'explore-html': {
     layer: 'utilities',
     invoke: '/kss:explore-html',
-    when: 'When an HTML artifact would beat markdown — reports, diagrams, slides, side-by-side comparisons, kanban editors. Always confirms format + destination first.',
+    when: 'When a one-shot HTML artifact beats markdown — reports, diagrams, slides, side-by-side comparisons, kanban editors. Static, no server. Always confirms format + destination first.',
     writes: [
       '/tmp/explorer-<slug>.html (throwaway, CDN-OK)',
-      'or a persistent path you choose (offline-safe required)'
+      'or a persistent path you choose (offline-safe required)',
+      'optional real-data JSON sidecar next to the HTML'
     ],
     reads: [
       'Whatever the user is exploring',
-      'often via a real-data JSON sidecar'
+      'often a real-data JSON snapshot'
     ],
     feeds: [],
     fedBy: ['start-session'],
-    prevents: 'Forcing spatial / interactive / comparative content into linear markdown. "Walls of prose" that don\'t get read.'
+    prevents: 'Forcing spatial / interactive / comparative content into linear markdown. "Walls of prose" that don\'t get read. (Low coupling — doesn\'t own any .kss/ state.)'
+  },
+  'explore-notebook': {
+    layer: 'utilities',
+    invoke: '/kss:explore-notebook',
+    when: 'When you\'ll iterate on a page over multiple rounds, need a real LAN-reachable URL (phone / another device), live-reload, or a two-way feedback surface. The served sibling of explore-html.',
+    writes: [
+      'a served HTML page + co-located CSS (offline-safe for deliverables)',
+      'feedback.jsonl / messages.jsonl / replies.jsonl / articles.jsonl beside the page',
+      '.exh-server.json sidecar (pid/port/host, deleted on clean shutdown)'
+    ],
+    reads: [
+      'Whatever the user is exploring (real data fetched first when available)',
+      'user feedback via Alt-click element pins + chat panel'
+    ],
+    feeds: [],
+    fedBy: ['start-session'],
+    prevents: 'Describing "the third row of section 02" in chat across revision rounds. file:// pages that can\'t be reached from a phone or auto-reload. (Low coupling — serves a page; doesn\'t own core .kss/ state.)'
   }
 };
 

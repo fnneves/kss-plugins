@@ -4,7 +4,7 @@ description: Close the active milestone — write SUMMARY.md, append to MILESTON
 
 # complete-milestone
 
-Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends a one-paragraph entry to the topic's MILESTONES.md, and resets state. With `--archive-topic`, archives the entire topic to `.kss/archive/`.
+Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends a one-paragraph entry to the topic's MILESTONES.md, and resets state. After closing, offers to archive the whole topic if it's fully done — `--archive-topic` is an explicit shortcut that skips straight to that offer.
 
 ## Pre-flight
 
@@ -21,7 +21,7 @@ Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends
 
 ## Inputs
 
-- `--archive-topic` (optional flag) — also archives the whole topic after closing the milestone. Use when the topic's success bar has been met.
+- `--archive-topic` (optional flag) — explicit shortcut. Skips straight to the archive offer after closing the milestone, for when you already know the topic's success bar has been met. Not required: a normal close always *offers* archive (step 8), so the flag is no longer something you must remember.
 
 ## Process
 
@@ -42,6 +42,10 @@ Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends
 4. **Capture deferred items.**
    - "Anything you discovered that's deferred to later? (will be logged as seeds)"
    - For each, write a SEEDS.md entry. **Demand a trigger condition** — same rule as `capture`.
+   - **If a deferred item is handed off to ANOTHER or a FUTURE topic** (not this one), ALSO append a row to `.kss/PROJECT.md` under `## Carryover (cross-topic handoffs)` (lazy-create the section if missing — see template below). **Demand a trigger condition** here too — same rule as SEEDS, no exceptions. This is **AUTO-DO** (append-only), but **show the exact line written.**
+     - `Source` = `{topic}/{milestone}` (the topic + milestone being closed).
+     - `Target topic` = a known topic slug if the user names one, else `TBD`.
+     - Confirm: "Carried over to PROJECT.md: `{the row}`."
 
 5. **Write `SUMMARY.md`** in the milestone folder, using the template below.
 
@@ -57,23 +61,29 @@ Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends
 
 7. **Update topic's `STATE.md`.**
    - `status: between-milestones`.
-   - `active_milestone: null`.
+   - `active_milestone: null` — this is the **single source of truth** for the active milestone; there is no project-level milestone pointer to clear.
    - Body: "Last shipped: {version}-{slug} on {date}. Run `plan-milestone` to scope the next."
 
-8. **Update project's `.kss/STATE.md`.**
-   - `active_milestone: null`.
+8. **Offer to archive the topic (SUGGEST-AND-CONFIRM).**
+   - **Offer (default = keep):** `Is {topic} fully done now — archive the whole topic, or keep going? [archive / keep]`
+   - If `--archive-topic` was passed, skip straight to this offer's confirm (the flag means "I already know" — still show the archive-confirm below, never archive silently).
+   - **On keep (default):** do nothing here; the topic stays active and between-milestones.
+   - **On archive:**
+     - First, ask: "Any deferred items handed off to a FUTURE topic? (will be logged to PROJECT.md `## Carryover`)" — for each, append a Carryover row exactly as in step 4 (Source = `{topic}/{milestone}`, **demand a trigger**, **show the line written**). This is **AUTO-DO** (append-only).
+     - Confirm: "Archive the whole topic `{slug}`? This marks the topic archived (a `status: archived` flag) — the files stay in place at `.kss/topics/{slug}/`."
+     - On yes (the archive is a **status flag, not a folder move** — see §4.8):
+       - (a) Set `status: archived` in `.kss/topics/{slug}/TOPIC.md` frontmatter.
+       - (b) In `PROJECT.md`, move the topic's row from `## Topics` to `## Archived Topics`, leaving a one-line breadcrumb, e.g. `- **{slug}** — {description} (archived {YYYY-MM-DD}; files at \`.kss/topics/{slug}/\`)`.
+       - (c) Clear the project pointer: set `active_topic: null` in `PROJECT.md` frontmatter.
+       - Do **not** move the directory — `.kss/topics/{slug}/` stays exactly where it is.
 
-9. **If `--archive-topic`:**
-   - Confirm with user: "Archive the whole topic `{slug}`? This moves `.kss/topics/{slug}/` to `.kss/archive/{slug}/`."
-   - On yes: move the directory. Update `PROJECT.md` (move topic from Topics to Archived Topics with a one-line breadcrumb pointing at the archive). Update `.kss/STATE.md` `active_topic: null`.
+9. **Tell the user.**
+    - If kept (not archived): "Milestone {version}-{slug} closed. Run `plan-milestone` for the next, or re-run `complete-milestone --archive-topic` if you decide this topic is fully done."
+    - If archived: "Topic `{slug}` marked `status: archived` (files stay at `.kss/topics/{slug}/`). Run `new-topic` to start the next, or `start-session --switch-topic <other>` if you have another active topic."
 
-10. **Tell the user.**
-    - Without `--archive-topic`: "Milestone {version}-{slug} closed. Run `plan-milestone` for the next, or `complete-milestone --archive-topic` if this topic is fully done."
-    - With `--archive-topic`: "Topic `{slug}` archived. Run `new-topic` to start the next, or `start-session --switch-topic <other>` if you have another active topic."
+10. **Suggest `distill`** if LOG.md or notes/ have grown meaningfully — "Consider running `distill` before moving on."
 
-11. **Suggest `distill`** if LOG.md or notes/ have grown meaningfully — "Consider running `distill` before moving on."
-
-12. **Do not commit.**
+11. **Do not commit.**
 
 ## Template: `milestones/{version}-{slug}/SUMMARY.md`
 
@@ -126,15 +136,33 @@ Captured as seeds:
 *Closed via complete-milestone on {YYYY-MM-DD}*
 ```
 
+## Template: `.kss/PROJECT.md` — `## Carryover (cross-topic handoffs)`
+
+Lazy-create this section in `PROJECT.md` if it doesn't exist. Append one row per cross-topic / future-topic handoff. **Every row REQUIRES a trigger** — same mandatory-trigger rule as SEEDS/`capture`.
+
+```markdown
+## Carryover (cross-topic handoffs)
+
+| Item | Trigger | Source | Target topic | Captured |
+|---|---|---|---|---|
+| {one-line item} | {observable trigger} | {topic}/{milestone} | {target-slug or TBD} | {YYYY-MM-DD} |
+```
+
+- `Source` = `{topic}/{milestone}` being closed.
+- `Target topic` = a known slug, or `TBD` if not yet decided. `new-topic` later claims rows whose Target matches its slug or is `TBD`.
+
 ## Output
 
 - New `SUMMARY.md` in the milestone folder (this is what marks it as "shipped").
 - Topic `MILESTONES.md` has a new top entry.
-- Both STATE.md files reset.
-- Optionally: whole topic moved to `.kss/archive/`.
+- Topic `STATE.md` reset (`status: between-milestones`, `active_milestone: null`). There is no project-level STATE.md to reset.
+- Optionally: cross-topic/future handoffs appended to `PROJECT.md` `## Carryover (cross-topic handoffs)`.
+- Optionally: topic marked `status: archived` (the flag in `TOPIC.md`; PROJECT.md row moved to `## Archived Topics`; `active_topic: null`). Files stay in place at `.kss/topics/{slug}/` — no folder move.
 
 ## Conventions
 
-- **`SUMMARY.md` is the shipped marker.** Don't move folders into a separate archive subfolder; the file's existence is the signal.
+- **`SUMMARY.md` is the shipped marker.** Don't move folders into a separate archive subfolder; the file's existence is the signal. **Archiving a topic follows the same philosophy** — it's a `status: archived` flag, not a folder move (see next bullet), so this convention is now internally consistent.
+- **Archive is a status flag, offered, never forced or silent.** A normal close ends with the `[archive / keep]` offer (default keep); `--archive-topic` is only a shortcut to that offer, not a way to skip the confirm. Archiving sets `status: archived` in the topic's `TOPIC.md`, moves the PROJECT.md row to `## Archived Topics` with a one-line breadcrumb, and sets `active_topic: null` — the topic directory **stays at `.kss/topics/{slug}/`** (no `git mv` to `.kss/archive/`, which is legacy). Skills enumerating topics exclude `status: archived`. The trail is `grep 'status: archived'`.
+- **Cross-topic handoffs are trigger-gated.** A deferred item bound for another/future topic goes to `PROJECT.md` `## Carryover` with a mandatory trigger — same discipline as SEEDS. Appending is AUTO-DO, but always show the row written.
 - **Be honest about gaps.** A `shipped-with-gaps` milestone is more useful than a fictional `shipped` one. Future-you will appreciate the truth.
 - **Don't auto-promote decisions to TOPIC.md.** Ask the user which ones are worth pulling up. Most decisions are milestone-local.

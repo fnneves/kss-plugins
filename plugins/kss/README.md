@@ -13,15 +13,15 @@ All state lives under `.kss/` at the project root.
 | Command | Layer | What it does |
 |---|---|---|
 | `/kss:scaffold-project` | Setup | Bootstrap `.kss/` shell. Run once per project. |
-| `/kss:map-codebase` | Setup | Generate or refresh `.kss/codebase/{STACK,STRUCTURE,CONVENTIONS,VOCABULARY}.md`. VOCABULARY is append-only across runs. |
-| `/kss:new-topic` | Lifecycle | Create a topic under `.kss/topics/`. Set as active. |
-| `/kss:plan-milestone` | Lifecycle | Scope + plan a milestone within the active topic. |
-| `/kss:complete-milestone` | Lifecycle | Close active milestone. With `--archive-topic`, archives whole topic. |
-| `/kss:start-session` | Session | Load context for active topic + milestone. Run at session start. |
+| `/kss:map-codebase` | Setup | Generate or refresh `.kss/codebase/{STACK,STRUCTURE,CONVENTIONS,VOCABULARY}.md`. VOCABULARY is append-only across runs; `## Learned` fences in STRUCTURE/CONVENTIONS (written by `distill`) are preserved across reruns too. |
+| `/kss:new-topic` | Lifecycle | Create a topic under `.kss/topics/`. Offers to set it active (or register it and stay on the current topic). Surfaces inherited `## Carryover` handoffs to claim. |
+| `/kss:plan-milestone` | Lifecycle | Scope + plan a milestone within the active topic. `--topic <slug>` plans a parallel/non-active track without moving the active pointer. |
+| `/kss:complete-milestone` | Lifecycle | Close active milestone (writes SUMMARY.md). Offers to archive the topic when it's done; `--archive-topic` is a shortcut. Logs cross-topic handoffs to PROJECT.md `## Carryover`. |
+| `/kss:start-session` | Session | Load context for active topic + milestone; re-verifies transient `## Scratch` facts instead of re-asserting them. Run at session start. |
 | `/kss:spike` | Session | Throwaway exploration with verdict-driven outcome. Fires mid-session when an idea needs testing before commitment. |
-| `/kss:wrap-up` | Session | Append LOG entry, update STATE, optionally write a note. Run at session end. |
+| `/kss:wrap-up` | Session | Append LOG entry, update STATE (transient env facts go under a `## Scratch` fence), optionally write a note. Offers to close the milestone when all tasks are done. Run at session end. |
 | `/kss:capture` | Knowledge | Drop a seed (with mandatory trigger), idea, or scratch note. |
-| `/kss:distill` | Knowledge | Extract durable insights from LOG + notes into CANONICAL-KB. Surfaces vocabulary candidates for VOCABULARY.md. |
+| `/kss:distill` | Knowledge | Extract durable insights from LOG + notes, routed across four homes: CANONICAL-KB (learnings/gotchas), codebase STRUCTURE/CONVENTIONS `## Learned` fences (structure & pattern facts), and VOCABULARY (terms). |
 | `/kss:skill-autopsy` | Meta | Log a short report when a skill underperformed, or analyze accumulated reports to propose SKILL.md improvements. |
 | `/kss:explore-html` | Utilities | Build a single-file interactive HTML page for exploration, comparison, reports, diagrams, slide decks, or drag-and-drop editors. Confirms format (HTML vs markdown) and destination path before drafting. |
 | `/kss:explore-notebook` | Utilities | Build a *served* interactive HTML notebook — live-reload, a real LAN-reachable URL, and a two-way feedback surface (Alt-click element pins, chat panel, agent markdown replies, click-to-open articles). The iterate-over-many-rounds sibling of `explore-html`; ships a bundled `serve.py`. |
@@ -58,7 +58,7 @@ flowchart TD
     Work --> W8["Iterate on a served dashboard / control room<br/>→ /kss:explore-notebook<br/><i>live-reload + LAN URL + click-to-feedback</i>"]
 ```
 
-Edge cases not in the diagram: rerun `map-codebase` after a major refactor, `complete-milestone --archive-topic` to archive the whole topic, and `skill-autopsy --consolidate` to analyze accumulated reports.
+Edge cases not in the diagram: rerun `map-codebase` after a major refactor; `plan-milestone --topic <slug>` to plan a parallel/non-active track without moving the active pointer; `complete-milestone` offers to archive a finished topic (`--archive-topic` skips straight to it); and `skill-autopsy --consolidate` to analyze accumulated reports.
 
 ## Daily flow
 
@@ -92,18 +92,17 @@ Flow:
 
 ```
 .kss/
-├── PROJECT.md             # durable identity + topics index
-├── STATE.md               # project-level pointer (active topic + milestone)
+├── PROJECT.md             # durable identity + topics index + ## Carryover; frontmatter holds active_topic (the single project pointer) + last_session
 ├── CANONICAL-KB.md        # cross-topic distilled knowledge
 ├── codebase/
 │   ├── STACK.md           # overwrites on map-codebase rerun
-│   ├── STRUCTURE.md       # overwrites on map-codebase rerun
-│   ├── CONVENTIONS.md     # overwrites on map-codebase rerun
+│   ├── STRUCTURE.md       # body overwrites on rerun; ## Learned fence preserved
+│   ├── CONVENTIONS.md     # body overwrites on rerun; ## Learned fence preserved
 │   └── VOCABULARY.md      # append-only — auto-seeded by map-codebase, grown by distill
 ├── topics/
 │   └── <topic-slug>/
-│       ├── TOPIC.md       # identity, success bar, key decisions
-│       ├── STATE.md       # current focus, blockers (overwritten)
+│       ├── TOPIC.md       # identity, success bar, key decisions; status: active|archived
+│       ├── STATE.md       # current focus, blockers, + ## Scratch fence; frontmatter active_milestone (source of truth)
 │       ├── LOG.md         # session-by-session, terse, newest-on-top
 │       ├── SEEDS.md       # parked items, each with a trigger condition
 │       ├── MILESTONES.md  # shipped milestone summaries, newest-on-top
@@ -115,11 +114,12 @@ Flow:
 │               ├── PLAN.md
 │               ├── SUMMARY.md
 │               └── note-YYYYMMDD-*.md
-├── spikes/
-│   └── YYYYMMDD-<slug>/
-│       └── README.md      # question, approach, findings, verdict
-└── archive/
-    └── <archived-topic>/  # whole topics that shipped or were abandoned
+└── spikes/
+    └── YYYYMMDD-<slug>/
+        └── README.md      # question, approach, findings, verdict
+
+# Archiving a topic sets `status: archived` in its TOPIC.md and moves its PROJECT.md
+# row to ## Archived Topics — the directory stays in topics/. (.kss/archive/ is legacy.)
 ```
 
 ## Key conventions
@@ -129,9 +129,14 @@ Flow:
 - **Slugs are kebab-case.**
 - **Dates: ISO `YYYY-MM-DD`** in frontmatter; `YYYYMMDD` as folder/file prefixes.
 - **Active vs shipped milestone:** presence of `SUMMARY.md` is the marker.
+- **Active vs archived topic:** `status: archived` in `TOPIC.md` is the marker. Archiving is a status flag, not a folder move — the directory stays in `topics/`; skills exclude archived topics from active listings (`grep 'status: archived'` is the trail).
 - **Seeds require a trigger condition.** No exceptions. Items without triggers rot — `capture` will refuse them.
+- **Detect-and-offer, never silently mutate.** Skills may detect a condition and *offer* the next action (close milestone, archive topic, claim a handoff) behind a one-keystroke confirm; they never auto-fire a state change. A confirm-prompt is not auto-routing.
+- **Durable vs transient STATE.** Topic STATE.md keeps durable position in "Current Position"/"Blockers"; rot-prone env facts (process up/down, ports, timestamps) go under a `## Scratch (transient — re-verify next session, safe to wipe)` fence. `start-session` re-verifies Scratch rather than re-asserting it.
+- **Cross-topic handoffs live in PROJECT.md `## Carryover`.** `complete-milestone` logs deferred-to-future-topic items there (trigger-gated); `new-topic` offers to claim them.
+- **`distill` has four destinations.** Learnings/gotchas → CANONICAL-KB; structure & pattern facts → codebase STRUCTURE/CONVENTIONS `## Learned` fences (preserved across `map-codebase` reruns); terms → VOCABULARY.
 - **Never auto-commit.** Skills modify files; user runs `git` themselves.
-- **Two-level state.** `.kss/STATE.md` is the *pointer*. Topic-level `STATE.md` is the *content*.
+- **Single project pointer.** `active_topic` lives in `.kss/PROJECT.md` frontmatter (there is no `.kss/STATE.md`). The active milestone is *derived*: read `active_topic`, then read that topic's `STATE.md` `active_milestone` — its single source of truth. `start-session` migrates any legacy `.kss/STATE.md` on first run.
 
 ## Installation
 

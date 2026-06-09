@@ -2,6 +2,8 @@
 
 **Keep Shit Simple — solo dev framework with reduced ceremony and high customization.**
 
+> **New to kss?** Start with the **[interactive explainers](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/)** — a visual tour of what it is and how the parts fit. The [overview & reference guide](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/00-kss-guide.html) is the quickest way in.
+
 I tested dozens of plugins, skills, and frameworks. I liked [GSD](https://github.com/gsd-build/get-shit-done) but wanted to make shit simpler — so I built this set of skills to keep my solo dev workflows organized and always ready to pick back up where I left them.
 
 This marketplace currently hosts a single plugin (`kss`). Designed to grow if more focused plugins land later.
@@ -18,10 +20,11 @@ Interactive HTML explainers covering kss from different angles. Single-file arti
 
 | | Explainer | What it covers |
 |---|---|---|
-| 01 | [kss in 6 slides](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/01-kss-in-6-slides.html) | The pitch deck — problem, core idea, 12 skills by layer, self-improvement loop, install. Scroll-snap slides with ←/→ navigation. |
+| 00 | [Overview & reference](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/00-kss-guide.html) | **Start here.** The comprehensive guide — what kss solves, the detect-and-offer principle, the self-improvement loop, all 13 skills by layer, the decision flow, and `.kss/` conventions. One page. |
+| 01 | [kss in 6 slides](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/01-kss-in-6-slides.html) | The pitch deck — problem, core idea, 13 skills by layer, self-improvement loop, install. Scroll-snap slides with ←/→ navigation. |
 | 02 | [The self-improvement loop](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/02-self-improvement-loop.html) | Interactive concept explainer for `skill-autopsy`. Click the timeline, flip `~/.kss-source` to see how outcomes differ for forkers vs. plain installs. |
-| 03 | [How the 12 skills interact](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/03-skills-interaction.html) | Data ownership graph. Click any skill to see what it writes, reads, downstream consumers, upstream feeders, and the failure mode it prevents. |
-| 04 | [The `.kss/` file system](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/04-kss-filesystem.html) | Surface tour of every file under `.kss/`. Tabs across root / codebase / topics / spikes & archive, with behavior pills and authorship for each path. |
+| 03 | [How the 13 skills interact](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/03-skills-interaction.html) | Data ownership graph. Click any skill to see what it writes, reads, downstream consumers, upstream feeders, and the failure mode it prevents. |
+| 04 | [The `.kss/` file system](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/04-kss-filesystem.html) | Surface tour of every file under `.kss/`. Tabs across root / codebase / topics / spikes, with behavior pills and authorship for each path. |
 
 Browse all explainers at <https://fnneves.github.io/kss-plugins/plugins/kss/explainers/>.
 

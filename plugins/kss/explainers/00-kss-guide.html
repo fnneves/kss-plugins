@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kss — overview &amp; reference</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --sky:    #6A8CAF;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ivory);
+    color: var(--g700);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 72px 32px 120px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* ── typography ───────────────────────────────────────── */
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(40px, 5vw, 56px); line-height: 1.06;
+    letter-spacing: -0.02em; color: var(--slate);
+    margin-bottom: 16px; max-width: 22ch;
+  }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 {
+    font-family: var(--serif); font-weight: 500; font-size: 27px;
+    color: var(--slate); letter-spacing: -0.012em; margin: 0 0 8px;
+  }
+  h3 {
+    font-family: var(--serif); font-weight: 500; font-size: 19px;
+    color: var(--slate); letter-spacing: -0.008em; margin: 0 0 8px;
+  }
+  h4 {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--g500); margin: 0 0 8px;
+  }
+  p { margin: 0 0 12px; max-width: 68ch; }
+  p.lead { font-size: 18px; color: var(--g700); max-width: 62ch; margin-bottom: 8px; }
+  .muted { color: var(--g500); }
+  a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--clay); }
+  code {
+    font-family: var(--mono); font-size: 0.86em; background: var(--g100);
+    padding: 2px 6px; border-radius: 4px; color: var(--slate);
+  }
+  pre {
+    font-family: var(--mono); font-size: 12.5px; background: var(--g100);
+    border: 1.5px solid var(--g200); border-radius: 10px; padding: 18px 20px;
+    overflow-x: auto; line-height: 1.6; color: var(--g700);
+  }
+  pre code { background: transparent; padding: 0; font-size: 12.5px; color: inherit; }
+  pre .cm { color: var(--g500); }
+  pre .cmd { color: var(--clay); }
+
+  /* ── header ───────────────────────────────────────────── */
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--g500); margin-bottom: 22px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before { content: ""; width: 28px; height: 1.5px; background: var(--clay); }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; }
+  nav.toc a {
+    font-size: 12.5px; padding: 7px 14px; border: 1.5px solid var(--g300);
+    border-radius: 999px; text-decoration: none; color: var(--g700);
+    background: var(--paper); display: inline-flex; align-items: center;
+    gap: 7px; transition: border-color 120ms, color 120ms;
+  }
+  nav.toc a .n { font-family: var(--mono); font-size: 10px; color: var(--g500); }
+  nav.toc a:hover { border-color: var(--slate); color: var(--slate); }
+  nav.toc a:hover .n { color: var(--clay); }
+
+  /* ── layout helpers ───────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card { background: var(--paper); border: 1.5px solid var(--g300); border-radius: 14px; padding: 24px; }
+  .card-soft { background: var(--g100); border-color: var(--g200); }
+  .card-emph { border-color: var(--slate); box-shadow: 0 12px 32px rgba(20,20,19,.08); }
+
+  section { margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px; }
+  .sec-head .idx {
+    font-family: var(--mono); font-size: 13px; color: var(--clay);
+    font-weight: 600; width: 32px; flex-shrink: 0;
+  }
+  .sec-head .count {
+    font-family: var(--mono); font-size: 11px; color: var(--g500);
+    background: var(--g100); padding: 2px 10px; border-radius: 999px;
+  }
+  .sec-intro { font-size: 14.5px; color: var(--g700); margin: 0 0 26px 48px; max-width: 70ch; }
+
+  /* ── pills ────────────────────────────────────────────── */
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.04em; padding: 2px 10px; border-radius: 999px;
+    background: var(--g100); color: var(--g700); border: 1px solid var(--g200);
+    vertical-align: middle;
+  }
+  .pill-clay  { background: rgba(217,119,87,0.12);  color: var(--clay-d); border-color: rgba(217,119,87,0.25); }
+  .pill-olive { background: rgba(120,140,93,0.14);  color: var(--olive);  border-color: rgba(120,140,93,0.25); }
+  .pill-sky   { background: rgba(106,140,175,0.14); color: var(--sky);    border-color: rgba(106,140,175,0.25); }
+  .pill-oat   { background: var(--oat); color: var(--slate); border-color: transparent; }
+  .pill-slate { background: var(--slate); color: var(--ivory); border-color: transparent; }
+
+  /* ── finding / callout card ───────────────────────────── */
+  .card-finding {
+    background: linear-gradient(180deg, var(--paper) 0%, #FBF6F1 100%);
+    border: 1.5px solid var(--g300); border-left: 3px solid var(--clay);
+    border-radius: 12px; padding: 24px 28px;
+  }
+  .card-finding h4 { color: var(--clay); }
+  .card-finding p { font-size: 15px; }
+  .card-finding p:last-child { margin-bottom: 0; }
+
+  /* ── quote ────────────────────────────────────────────── */
+  .quote {
+    font-family: var(--serif); font-style: italic; font-size: 19px;
+    color: var(--slate); padding-left: 18px; border-left: 3px solid var(--clay);
+    margin: 28px 0; max-width: 62ch;
+  }
+
+  /* ── compare ──────────────────────────────────────────── */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1.5px solid var(--g300); border-radius: 12px; overflow: hidden;
+  }
+  .compare > div { padding: 22px 24px; }
+  .compare > div:first-child { border-right: 1.5px solid var(--g300); background: var(--g100); }
+  .compare h4 { margin-bottom: 12px; }
+  .compare ul { padding-left: 20px; font-size: 14px; }
+  .compare li { margin-bottom: 6px; }
+  @media (max-width: 800px) {
+    .compare { grid-template-columns: 1fr; }
+    .compare > div:first-child { border-right: none; border-bottom: 1.5px solid var(--g300); }
+  }
+
+  /* ── layer cards (skills overview) ────────────────────── */
+  .layer-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 900px) { .layer-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 620px) { .layer-grid { grid-template-columns: 1fr; } }
+  .layer-card { background: var(--g100); border: 1.5px solid var(--g200); border-radius: 12px; padding: 18px 20px; }
+  .layer-card .layer-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .layer-card h3 { font-size: 17px; margin: 0; }
+  .layer-card .count { font-family: var(--mono); font-size: 11px; color: var(--g500); background: var(--paper); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--g200); }
+  .layer-card .skills { font-family: var(--mono); font-size: 12.5px; color: var(--g700); line-height: 1.7; }
+  .layer-card .gloss { font-size: 13px; color: var(--g500); margin-top: 8px; }
+
+  /* ── skill detail cards ───────────────────────────────── */
+  .layer-label { display: flex; align-items: center; gap: 12px; margin: 36px 0 14px; }
+  .layer-label h3 { margin: 0; font-size: 20px; }
+  .layer-label .sub { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--g500); }
+  .skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 820px) { .skill-grid { grid-template-columns: 1fr; } }
+  .skill-card { background: var(--paper); border: 1.5px solid var(--g300); border-radius: 12px; padding: 18px 20px; }
+  .skill-card .skill-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .skill-card .skill-head h4 { font-family: var(--mono); font-size: 14.5px; color: var(--slate); font-weight: 600; text-transform: none; letter-spacing: 0; margin: 0; }
+  .skill-card .skill-body { font-size: 13.5px; color: var(--g700); }
+  .skill-card .skill-body .label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--g500); display: block; margin-top: 8px; margin-bottom: 2px; }
+
+  /* ── decision flow ────────────────────────────────────── */
+  .flow { display: flex; flex-direction: column; gap: 0; margin-top: 12px; }
+  .flow-step { background: var(--paper); border: 1.5px solid var(--g300); border-radius: 14px; padding: 20px 24px; display: grid; grid-template-columns: 32px 1fr; gap: 18px; align-items: start; }
+  .flow-step .idx { font-family: var(--mono); font-size: 13px; color: var(--clay); font-weight: 600; padding-top: 2px; }
+  .flow-step .body { display: flex; flex-direction: column; gap: 12px; }
+  .flow-q { font-family: var(--serif); font-size: 18px; color: var(--slate); letter-spacing: -0.005em; }
+  .flow-branches { display: flex; flex-direction: column; gap: 8px; }
+  .flow-branch { display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center; padding: 10px 14px; background: var(--g100); border-radius: 10px; font-size: 14px; }
+  .flow-branch.yes { background: rgba(217,119,87,0.08); }
+  .flow-branch .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; text-align: center; font-weight: 600; }
+  .flow-branch.yes .tag { background: var(--clay); color: var(--paper); }
+  .flow-branch.no .tag { background: var(--g300); color: var(--slate); }
+  .flow-branch .skill { font-family: var(--mono); font-size: 13.5px; color: var(--slate); font-weight: 500; }
+  .flow-branch .why { font-family: var(--serif); font-style: italic; font-size: 13.5px; color: var(--g700); margin-top: 2px; }
+  .flow-connector { display: flex; align-items: center; justify-content: center; height: 26px; color: var(--g300); }
+  .flow-connector::before { content: "│"; font-family: var(--mono); font-size: 18px; }
+  .flow-hub { margin-top: 26px; padding: 26px 32px; background: var(--slate); color: var(--ivory); border-radius: 14px; text-align: center; }
+  .flow-hub .label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--oat); margin-bottom: 6px; }
+  .flow-hub h3 { font-family: var(--serif); font-size: 24px; color: var(--ivory); margin: 0; font-weight: 500; }
+  .flow-fan { margin-top: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 980px) { .flow-fan { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .flow-fan { grid-template-columns: 1fr; } }
+  .flow-fan-card { background: var(--paper); border: 1.5px solid var(--g300); border-left: 3px solid var(--clay); border-radius: 10px; padding: 14px 16px; }
+  .flow-fan-card .trigger { font-size: 13px; color: var(--g700); margin-bottom: 6px; }
+  .flow-fan-card .skill { font-family: var(--mono); font-size: 12.5px; color: var(--slate); font-weight: 600; margin-bottom: 4px; }
+  .flow-fan-card .why { font-family: var(--serif); font-style: italic; font-size: 12.5px; color: var(--g500); }
+
+  /* ── field tables ─────────────────────────────────────── */
+  table.fields { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.fields th, table.fields td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--g200); vertical-align: top; }
+  table.fields th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--g500); font-weight: 600; background: var(--g100); border-bottom-color: var(--g300); }
+  table.fields td:first-child { font-family: var(--mono); white-space: nowrap; color: var(--slate); }
+  table.fields td.note { color: var(--g700); font-size: 13px; }
+
+  /* ── footer ───────────────────────────────────────────── */
+  footer {
+    margin-top: 80px; padding-top: 28px; border-top: 1.5px solid var(--g300);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    flex-wrap: wrap; font-size: 13px; color: var(--g500);
+  }
+  footer .k { font-family: var(--serif); font-style: italic; color: var(--g700); font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">kss · overview &amp; reference</div>
+    <h1>Keep Shit <em>Simple</em></h1>
+    <p class="lead">A solo-dev framework for Claude Code: reduced ceremony, durable state across sessions, an opt-in self-improvement loop. Thirteen small skills, a clean folder convention, and one governing principle — <em>detect, then offer</em>; never auto-fire.</p>
+    <p class="muted">v0.4.0 · the complete tour. For the other lenses, see the <a href="index.html">explainers index</a>; for the canonical command table, the <a href="../README.md"><code>README</code></a>.</p>
+    <nav class="toc">
+      <a href="#what">What kss is <span class="n">01</span></a>
+      <a href="#principle">Detect-and-offer <span class="n">02</span></a>
+      <a href="#improve">Self-improvement loop <span class="n">03</span></a>
+      <a href="#skills">13 skills, 6 layers <span class="n">04</span></a>
+      <a href="#flow">Which skill when <span class="n">05</span></a>
+      <a href="#filesystem">.kss/ &amp; conventions <span class="n">06</span></a>
+      <a href="#install">Install <span class="n">07</span></a>
+    </nav>
+  </header>
+
+  <div class="card-finding" style="margin-top: 40px;">
+    <h4>What's worth knowing up front</h4>
+    <p><strong>1.</strong> kss is built around <em>durable state files</em>, not chat memory. When you come back tomorrow, the state is on disk under <code>.kss/</code> — not in your head, not in a context window.</p>
+    <p><strong>2.</strong> Skills <em>detect</em> a condition and <em>offer</em> the next action behind a one-keystroke confirm. They never auto-fire a state change and no skill ever runs <code>git commit</code>.</p>
+    <p><strong>3.</strong> The self-improvement loop is <em>opt-in</em>. You only invoke <code>skill-autopsy</code> when a skill misfires; nothing watches you in the background.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       01 — What kss is / what it solves
+       ════════════════════════════════════════════════════════ -->
+  <section id="what">
+    <div class="sec-head">
+      <span class="idx">01</span>
+      <h2>What kss is, and what it solves</h2>
+      <span class="count">the problem</span>
+    </div>
+    <p class="sec-intro">Solo dev with an AI agent has a specific failure mode: every session starts cold, the agent re-asks what you already decided, and work-in-flight gets reasoned about from a fresh slate. Heavier frameworks address this with rituals and roles. kss addresses it with files.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4 class="muted">Problem 01</h4>
+        <h3>Cold-start every session</h3>
+        <p>You closed the laptop yesterday mid-thought. Today the agent has no idea what you were doing, why, or what's next.</p>
+        <p class="muted" style="font-size: 13px;">→ <code>start-session</code> reads the active topic's <code>STATE.md</code> + recent <code>LOG.md</code> and tells you exactly where you left off.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 02</h4>
+        <h3>Many tracks, one head</h3>
+        <p>You have three half-finished initiatives. Without isolation, ideas bleed across; you commit to A, end up touching B, lose the thread on both.</p>
+        <p class="muted" style="font-size: 13px;">→ <code>topics</code> isolate work tracks. <code>milestones</code> scope finite chunks inside a topic. One topic is active at a time.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 03</h4>
+        <h3>Insights rot in chat history</h3>
+        <p>You learn something useful in session 12. By session 30, nobody remembers it. You re-discover the same gotcha quarterly.</p>
+        <p class="muted" style="font-size: 13px;">→ <code>capture</code> parks ideas; <code>distill</code> promotes durable insight to <code>CANONICAL-KB.md</code> and three other homes.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 22px;">
+      <div class="card">
+        <h4 class="muted">Problem 04</h4>
+        <h3>Skills you can't fix</h3>
+        <p>Most agent frameworks ship rigid skills. When one consistently misfires, you have nowhere to put the feedback — so the same friction recurs forever.</p>
+        <p class="muted" style="font-size: 13px;">→ <code>skill-autopsy</code> turns a frustration into a report, then into a concrete diff against the offending <code>SKILL.md</code>.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Problem 05</h4>
+        <h3>Risky exploration, expensive cleanup</h3>
+        <p>You want to test "what if". Branching feels heavy; commit feels premature. Without a parking spot, exploration leaks into the main work.</p>
+        <p class="muted" style="font-size: 13px;">→ <code>spike</code> creates a throwaway folder under <code>.kss/spikes/</code> with one job: produce a verdict (keep / drop / promote).</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 40px;">Where it fits</h3>
+    <p class="muted" style="margin-bottom: 16px; max-width: 70ch;">kss is opinionated about what it isn't. It is not a startup-team simulator and not a deploy pipeline.</p>
+    <div class="compare">
+      <div>
+        <h4 class="muted">Heavyweight frameworks (gstack-style)</h4>
+        <ul>
+          <li>~45 skills modeling a startup team (CEO, Eng, Designer, QA, SRE)</li>
+          <li>Multi-step pipelines that ship code: <code>/ship</code>, <code>/land-and-deploy</code>, <code>/canary</code></li>
+          <li>Optimized for ~10K LOC/week throughput</li>
+          <li>Auto-commits, auto-deploys, auto-monitors</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="muted">kss — this framework</h4>
+        <ul>
+          <li>13 skills; no roles, no orchestration</li>
+          <li>State lives in plain markdown files under <code>.kss/</code></li>
+          <li>Optimized for <em>continuity</em> across many short sessions</li>
+          <li>Never auto-commits; every artifact is a file you review</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top: 20px;">Inspired by <a href="https://github.com/gsd-build/get-shit-done">GSD (Get Shit Done)</a> — kss borrows the lifecycle ideas (topic isolation, codebase map, trigger-conditioned seeds) without the multi-agent ceremony. The "shit" pun is on the nose: keep the structure, drop the theatre.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       02 — The detect-and-offer principle
+       ════════════════════════════════════════════════════════ -->
+  <section id="principle">
+    <div class="sec-head">
+      <span class="idx">02</span>
+      <h2>The governing principle: detect-and-offer</h2>
+      <span class="count">v0.4.0</span>
+    </div>
+    <p class="sec-intro">Earlier versions made you remember a command or a flag for every transition. v0.4.0 cut that ceremony without weakening the durable record. The rule: <strong>detection is free, mutation is confirmed.</strong> A skill detects a condition and <em>offers</em> the next action behind a one-keystroke confirm. It never auto-fires a state change, and a confirm-prompt is not auto-routing.</p>
+
+    <div class="quote">"Detection is free. Mutation is confirmed. A confirm-prompt is not auto-routing."</div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4>wrap-up</h4>
+        <p>Detects that every <code>PLAN</code> task is checked <code>✓</code> and <em>offers</em> to close the milestone. Tasks-done is the <em>trigger</em>; <code>complete-milestone</code>'s success interview stays the <em>gate</em> that authors <code>SUMMARY.md</code>.</p>
+      </div>
+      <div class="card">
+        <h4>complete-milestone</h4>
+        <p>On closing the last milestone, <em>offers</em> to archive the whole topic. <code>--archive-topic</code> is demoted from a must-remember flag to an optional shortcut.</p>
+      </div>
+      <div class="card">
+        <h4>new-topic</h4>
+        <p>No longer force-activates the new topic — <em>offers</em> activation (or register-and-stay-put). It reads <code>## Carryover</code> and offers to claim inherited handoffs.</p>
+      </div>
+    </div>
+
+    <div class="card card-emph" style="margin-top: 22px;">
+      <h4 class="muted">Consistent with the older rules</h4>
+      <p style="margin-bottom: 0;">detect-and-offer is the same posture as "never auto-route" and "never auto-commit", generalized. Skills are allowed to <em>notice</em> things — a finished milestone, a transient fact gone stale, a deferred handoff — and surface them. What they may never do is mutate state, move folders, or commit on your behalf without an explicit yes.</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       03 — The self-improvement loop
+       ════════════════════════════════════════════════════════ -->
+  <section id="improve">
+    <div class="sec-head">
+      <span class="idx">03</span>
+      <h2>The self-improvement loop</h2>
+      <span class="count">opt-in</span>
+    </div>
+    <p class="sec-intro"><code>skill-autopsy</code> is the only entry point that captures friction with a skill and proposes a fix. It runs only when you call it — never automatically. Reports are treated as personal artifacts, never as plugin source.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4 class="muted">Step 1 · Capture</h4>
+        <h3>One frustration → one report</h3>
+        <p>Invoke <code>skill-autopsy &lt;skill&gt;</code> right after a misfire. A short interview captures what you asked, what the skill did, why it was off. Appended (newest-on-top) to <code>~/kss-skill-reports/&lt;skill&gt;.md</code> — your home folder, never inside the plugin.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Step 2 · Accumulate</h4>
+        <h3>Patterns need samples</h3>
+        <p>One report is a complaint; three might be a pattern. Autopsy stays silent through the first three. At four it offers to consolidate; past five it nudges harder. Caps are warnings, not refusals.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Step 3 · Propose</h4>
+        <h3>Concrete diff or "nothing yet"</h3>
+        <p>Consolidate mode reads the reports for recurring root causes. With signal, it proposes a diff to that <code>SKILL.md</code>. If reports are vague, it says so honestly. <strong>Never fabricates</strong> — "nothing to change yet" is a valid outcome.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 22px;">
+      <div class="card">
+        <h4>Reports location</h4>
+        <h3><code>~/kss-skill-reports/&lt;skill&gt;.md</code></h3>
+        <p>Personal, always writable, never committed to plugin source. Each report is one dated entry: what was asked, what the skill did, why it was off, optional hypothesis.</p>
+      </div>
+      <div class="card">
+        <h4>Source path (optional)</h4>
+        <h3><code>~/.kss-source</code></h3>
+        <p>A one-line file with the absolute path to a writable kss clone. When set, consolidate mode <em>applies</em> the diff there and prints the <code>git -C</code> commit hint — but never runs it. Without it, the diff is <em>printed</em> for manual handling (fork later, open an issue, adapt usage).</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 28px;">Threshold logic</h3>
+    <table class="fields" style="margin-top: 12px;">
+      <thead><tr><th>Report count</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>0 — 3</td><td class="note">Append silently. Patterns aren't reliable yet at this volume.</td></tr>
+        <tr><td>4 — 5</td><td class="note">Offer to consolidate — <em>"we already have N reports; want me to explore them for improvements?"</em></td></tr>
+        <tr><td>6+</td><td class="note">Escalate — <em>"past 5, patterns get tangled; strongly recommend reviewing now."</em> A warning, not a refusal.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       04 — 13 skills, 6 layers
+       ════════════════════════════════════════════════════════ -->
+  <section id="skills">
+    <div class="sec-head">
+      <span class="idx">04</span>
+      <h2>The skills</h2>
+      <span class="count">13 skills · 6 layers</span>
+    </div>
+    <p class="sec-intro">Each skill is a single <code>SKILL.md</code> with YAML frontmatter that controls when Claude Code surfaces it; the body is the behavior contract. You only invoke what the situation demands — there's no orchestrator running them in sequence.</p>
+
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-head"><h3>Setup</h3><span class="count">2</span></div>
+        <div class="skills">scaffold-project<br>map-codebase</div>
+        <div class="gloss">Bootstrap once per project; refresh after major refactors.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Lifecycle</h3><span class="count">3</span></div>
+        <div class="skills">new-topic<br>plan-milestone<br>complete-milestone</div>
+        <div class="gloss">Topics isolate work tracks; milestones scope finite chunks.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Session</h3><span class="count">3</span></div>
+        <div class="skills">start-session<br>spike<br>wrap-up</div>
+        <div class="gloss">Bookend each session; spike when an idea needs testing first.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Knowledge</h3><span class="count">2</span></div>
+        <div class="skills">capture<br>distill</div>
+        <div class="gloss">Park ideas with triggers; promote durable insight to the KB.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Meta</h3><span class="count">1</span></div>
+        <div class="skills">skill-autopsy</div>
+        <div class="gloss">The self-improvement loop — fix skills that misfire.</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head"><h3>Utilities</h3><span class="count">2</span></div>
+        <div class="skills">explore-html<br>explore-notebook</div>
+        <div class="gloss">On-demand HTML artifacts — one-shot static, or served &amp; iterated.</div>
+      </div>
+    </div>
+
+    <!-- Setup -->
+    <div class="layer-label"><span class="pill pill-clay">Setup</span><h3>one-time bootstrap</h3><span class="sub">run once per project</span></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>scaffold-project</h4><span class="pill">setup</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Once per project. "set up kss", "scaffold", "bootstrap", "initialize planning".
+          <span class="label">What</span>Creates the <code>.kss/</code> shell — <code>PROJECT.md</code>, <code>CANONICAL-KB.md</code>, empty topic and spike folders. (No <code>.kss/STATE.md</code> — the active pointer lives in PROJECT.md frontmatter.)
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>map-codebase</h4><span class="pill">setup</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>After scaffold; again whenever the codebase shape shifts meaningfully.
+          <span class="label">What</span>Generates four files under <code>.kss/codebase/</code>: <code>STACK</code>, <code>STRUCTURE</code>, <code>CONVENTIONS</code> (bodies overwrite on rerun), <code>VOCABULARY</code> (append-only). The <code>## Learned</code> fences in STRUCTURE/CONVENTIONS are <em>preserved</em> across reruns.
+        </div>
+      </div>
+    </div>
+
+    <!-- Lifecycle -->
+    <div class="layer-label"><span class="pill pill-olive">Lifecycle</span><h3>topic + milestone management</h3></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>new-topic</h4><span class="pill">lifecycle</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Starting an unrelated work track. "new topic", "switch focus to something different".
+          <span class="label">What</span>Creates <code>.kss/topics/&lt;slug&gt;/</code> with TOPIC, STATE, LOG, SEEDS, MILESTONES. <em>Offers</em> to set it active (or register and stay put); offers to claim inherited <code>## Carryover</code> handoffs.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>plan-milestone</h4><span class="pill">lifecycle</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Ready to start a chunk. "plan", "scope", "what should I tackle next".
+          <span class="label">What</span>Adaptive — discusses scope if fuzzy, plans directly if not. Writes <code>PLAN.md</code> in a new milestone folder. An in-flight milestone prompts (close / switch / plan anyway); <code>--topic &lt;slug&gt;</code> plans a parallel track without moving the active pointer.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>complete-milestone</h4><span class="pill">lifecycle</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Milestone shipped. "done", "shipped", "wrap up the milestone".
+          <span class="label">What</span>Writes <code>SUMMARY.md</code> (the shipped marker), appends to <code>MILESTONES.md</code>, resets state. <em>Offers</em> to archive a finished topic (<code>--archive-topic</code> is a shortcut). Logs deferred items to <code>PROJECT.md</code> <code>## Carryover</code>.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>start-session</h4><span class="pill">session</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Beginning of work. "what was I working on", "where did we leave off", "catch me up".
+          <span class="label">What</span>Resolves <code>active_topic</code> from PROJECT.md, reads that topic's STATE + recent LOG + active milestone's PLAN. Re-verifies <code>## Scratch</code> facts instead of re-asserting them. Migrates a legacy <code>.kss/STATE.md</code> on first run.
+        </div>
+      </div>
+    </div>
+
+    <!-- Session -->
+    <div class="layer-label"><span class="pill pill-sky">Session</span><h3>bookend every coding session</h3></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>spike</h4><span class="pill">session</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Test a risky idea before committing. "let's try", "spike on", "see if it works".
+          <span class="label">What</span>Creates a throwaway folder under <code>.kss/spikes/YYYYMMDD-&lt;slug&gt;/</code>. <code>README.md</code> captures question, approach, findings, verdict. The verdict is the artifact; code is incidental.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>wrap-up</h4><span class="pill">session</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Ending a session. "done for the day", "log this", "wrap up", "let's call it".
+          <span class="label">What</span>Appends a terse LOG entry, refreshes topic STATE (rot-prone env facts go under the <code>## Scratch</code> fence, not durable Blockers), optionally writes a note. <em>Offers</em> to close the milestone when all PLAN tasks are <code>✓</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge -->
+    <div class="layer-label"><span class="pill pill-oat">Knowledge</span><h3>park ideas, distill durable insight</h3></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>capture</h4><span class="pill">knowledge</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Mid-flow, an idea or todo surfaces. "remind me to", "for later", "park this", "don't forget".
+          <span class="label">What</span>Drops a seed (with a <strong>mandatory trigger</strong> — items without triggers rot, so capture refuses them), a backlog idea, or a scratch note in the active topic's <code>SEEDS.md</code>.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>distill</h4><span class="pill">knowledge</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>Notes / LOG piling up — typically before <code>complete-milestone</code>, or periodically.
+          <span class="label">What</span>The rot-prevention pass. Routes insight to <strong>four destinations</strong>: learnings/gotchas → <code>CANONICAL-KB.md</code>; structure &amp; pattern facts → codebase <code>STRUCTURE</code>/<code>CONVENTIONS</code> <code>## Learned</code> fences; terms → <code>VOCABULARY.md</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Meta -->
+    <div class="layer-label"><span class="pill pill-clay">Meta</span><h3>the self-improvement loop</h3></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>skill-autopsy</h4><span class="pill">meta</span><span class="pill pill-clay">opt-in</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>A specific skill misfires. "skill X didn't do what I wanted", "log a complaint", "review skill X reports".
+          <span class="label">What</span>Two modes. <em>Write</em>: interviews you, appends a report to <code>~/kss-skill-reports/&lt;skill&gt;.md</code>. <em>Consolidate</em>: reads accumulated reports, finds recurring root causes, proposes a diff to that SKILL.md (applied if <code>~/.kss-source</code> is set, printed otherwise). Never fabricates.
+        </div>
+      </div>
+    </div>
+
+    <!-- Utilities -->
+    <div class="layer-label"><span class="pill pill-slate">Utilities</span><h3>on-demand HTML artifacts</h3></div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-head"><h4>explore-html</h4><span class="pill">utilities</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>"explore", "compare side-by-side", "a report", "a diagram", "slides", "a kanban board", or an explicit HTML request.
+          <span class="label">What</span>Builds a single-file interactive HTML page for exploration, comparison, reports, diagrams, slide decks, or drag-and-drop editors. Confirms format (HTML vs markdown) and destination path before drafting.
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-head"><h4>explore-notebook</h4><span class="pill">utilities</span></div>
+        <div class="skill-body">
+          <span class="label">When</span>You'll iterate on a served page over many rounds, or need a LAN-reachable URL.
+          <span class="label">What</span>A <em>served</em> interactive HTML notebook — live-reload over SSE, a real URL, and a two-way feedback surface (Alt-click element pins, chat panel, agent replies, click-to-open articles). Ships a bundled stdlib <code>serve.py</code>. The iterate-over-rounds sibling of <code>explore-html</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       05 — Decision flow
+       ════════════════════════════════════════════════════════ -->
+  <section id="flow">
+    <div class="sec-head">
+      <span class="idx">05</span>
+      <h2>Which skill when</h2>
+      <span class="count">decision flow</span>
+    </div>
+    <p class="sec-intro">The spine below is the typical solo-dev path; the in-session "now what?" hub fans out to the skills you'd reach for during work. Italics explain <em>why</em>.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <span class="idx">01</span>
+        <div class="body">
+          <div class="flow-q">First time in this project?</div>
+          <div class="flow-branches">
+            <div class="flow-branch yes">
+              <span class="tag">yes</span>
+              <div><div class="skill">/kss:scaffold-project → /kss:map-codebase</div><div class="why">Bootstrap <code>.kss/</code> state files + codebase map.</div></div>
+            </div>
+            <div class="flow-branch no">
+              <span class="tag">no</span>
+              <div><span class="skill muted">Skip → next decision.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector"></div>
+
+      <div class="flow-step">
+        <span class="idx">02</span>
+        <div class="body">
+          <div class="flow-q">Starting work unrelated to the active topic?</div>
+          <div class="flow-branches">
+            <div class="flow-branch yes">
+              <span class="tag">yes</span>
+              <div><div class="skill">/kss:new-topic</div><div class="why">Isolate the work track. Offers to set it active.</div></div>
+            </div>
+            <div class="flow-branch no">
+              <span class="tag">no</span>
+              <div><span class="skill muted">Continue with current topic → next decision.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector"></div>
+
+      <div class="flow-step">
+        <span class="idx">03</span>
+        <div class="body">
+          <div class="flow-q">Is an active milestone already scoped?</div>
+          <div class="flow-branches">
+            <div class="flow-branch no">
+              <span class="tag">no</span>
+              <div><div class="skill">/kss:plan-milestone → /kss:start-session</div><div class="why">Scope a finite chunk + write PLAN.md, then load context.</div></div>
+            </div>
+            <div class="flow-branch yes">
+              <span class="tag">yes</span>
+              <div><div class="skill">/kss:start-session</div><div class="why">Load topic + milestone context — recent log, next steps, blockers.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector"></div>
+
+      <div class="flow-hub">
+        <div class="label">Hub</div>
+        <h3>In session — now what?</h3>
+      </div>
+
+      <div class="flow-fan">
+        <div class="flow-fan-card"><div class="trigger">Test a risky idea first</div><div class="skill">/kss:spike</div><div class="why">Throwaway exploration, verdict-driven.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Park a future idea</div><div class="skill">/kss:capture</div><div class="why">Seed (needs trigger), idea, or note.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Notes / LOG piling up</div><div class="skill">/kss:distill</div><div class="why">Route durable insight to its four homes.</div></div>
+        <div class="flow-fan-card"><div class="trigger">A skill misfired</div><div class="skill">/kss:skill-autopsy</div><div class="why">Postmortem + propose SKILL.md fix.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Milestone shipped</div><div class="skill">/kss:complete-milestone</div><div class="why">Close milestone, write SUMMARY.md.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Ending the session</div><div class="skill">/kss:wrap-up</div><div class="why">Append LOG + refresh STATE.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Need a visual artifact</div><div class="skill">/kss:explore-html</div><div class="why">One-shot HTML: report, diagram, deck.</div></div>
+        <div class="flow-fan-card"><div class="trigger">Iterate on a served page</div><div class="skill">/kss:explore-notebook</div><div class="why">Live-reload + LAN URL + feedback.</div></div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top: 18px; max-width: 72ch;">Edge cases not in the diagram: rerun <code>map-codebase</code> after a major refactor; <code>plan-milestone --topic &lt;slug&gt;</code> to plan a parallel track without moving the active pointer; <code>complete-milestone</code> offers to archive a finished topic (<code>--archive-topic</code> skips to it); and <code>skill-autopsy --consolidate</code> to analyze accumulated reports without writing a new one.</p>
+
+    <h3 style="margin-top: 40px;">Daily flow</h3>
+    <pre style="margin-top: 12px;"><span class="cm">once per project:</span>    <span class="cmd">/kss:scaffold-project</span> → <span class="cmd">/kss:map-codebase</span>
+<span class="cm">once per topic:</span>      <span class="cmd">/kss:new-topic</span>
+<span class="cm">per milestone:</span>       <span class="cmd">/kss:plan-milestone</span> → (sessions...) → <span class="cmd">/kss:complete-milestone</span>
+<span class="cm">per session:</span>         <span class="cmd">/kss:start-session</span> → (work) → <span class="cmd">/kss:wrap-up</span>
+
+<span class="cm">anytime:</span>      <span class="cmd">/kss:capture</span>   <span class="cm"># park a seed/idea</span>
+<span class="cm">periodically:</span> <span class="cmd">/kss:distill</span>   <span class="cm"># consolidate learnings</span>
+<span class="cm">exploring:</span>    <span class="cmd">/kss:spike</span>     <span class="cm"># cheap throwaway test</span>
+<span class="cm">on friction:</span>  <span class="cmd">/kss:skill-autopsy &lt;skill&gt;</span></pre>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       06 — The .kss/ filesystem + conventions
+       ════════════════════════════════════════════════════════ -->
+  <section id="filesystem">
+    <div class="sec-head">
+      <span class="idx">06</span>
+      <h2>The <code>.kss/</code> filesystem &amp; conventions</h2>
+      <span class="count">the shape is the API</span>
+    </div>
+    <p class="sec-intro">Every kss skill reads from and writes to this tree. The shape <em>is</em> the API — there are no status fields to drift, because state is encoded in structure (a file's existence, a frontmatter flag).</p>
+
+<pre><code>.kss/
+├── PROJECT.md             <span class="cm"># identity + topics index + ## Carryover;</span>
+│                          <span class="cm"># frontmatter holds active_topic — the SINGLE project pointer</span>
+├── CANONICAL-KB.md        <span class="cm"># cross-topic distilled knowledge (learnings/gotchas)</span>
+├── codebase/
+│   ├── STACK.md           <span class="cm"># body overwrites on map-codebase rerun</span>
+│   ├── STRUCTURE.md       <span class="cm"># body overwrites; ## Learned fence preserved</span>
+│   ├── CONVENTIONS.md     <span class="cm"># body overwrites; ## Learned fence preserved</span>
+│   └── VOCABULARY.md      <span class="cm"># append-only — auto-seeded, grown by distill</span>
+├── topics/
+│   └── &lt;topic-slug&gt;/
+│       ├── TOPIC.md       <span class="cm"># identity, success bar, decisions; status: active|archived</span>
+│       ├── STATE.md       <span class="cm"># current position + blockers + ## Scratch fence;</span>
+│       │                  <span class="cm"># frontmatter active_milestone — SOURCE OF TRUTH</span>
+│       ├── LOG.md         <span class="cm"># session-by-session, terse, newest-on-top</span>
+│       ├── SEEDS.md       <span class="cm"># parked items, each with a trigger condition</span>
+│       ├── MILESTONES.md  <span class="cm"># shipped summaries, newest-on-top</span>
+│       └── milestones/
+│           └── &lt;version&gt;-&lt;slug&gt;/
+│               ├── PLAN.md
+│               ├── SUMMARY.md     <span class="cm"># present ⇒ milestone is SHIPPED</span>
+│               └── note-YYYYMMDD-*.md
+└── spikes/
+    └── YYYYMMDD-&lt;slug&gt;/
+        └── README.md      <span class="cm"># question, approach, findings, verdict</span>
+
+<span class="cm"># No .kss/STATE.md and no .kss/archive/ — both are legacy (removed in v0.4.0).</span></code></pre>
+
+    <div class="grid-2" style="margin-top: 22px;">
+      <div class="card card-emph">
+        <h4 class="muted">The state model</h4>
+        <h3>One pointer, one derivation</h3>
+        <p>The single non-derivable fact is <code>active_topic</code>, in <code>PROJECT.md</code> frontmatter. The active milestone is <em>derived</em>: read <code>active_topic</code>, then read that topic's <code>STATE.md</code> <code>active_milestone</code> — its single source of truth. This removed a double-write that previously spanned five skills.</p>
+        <p style="margin-bottom: 0;"><strong>There is no <code>.kss/STATE.md</code>.</strong> It was eliminated in v0.4.0; <code>start-session</code> migrates any legacy one on first run, then deletes it.</p>
+      </div>
+      <div class="card card-emph">
+        <h4 class="muted">Archiving a topic</h4>
+        <h3>A status flag, not a folder move</h3>
+        <p>Archiving sets <code>status: archived</code> in the topic's <code>TOPIC.md</code> and moves its <code>PROJECT.md</code> row to <code>## Archived Topics</code>. The directory <strong>stays</strong> in <code>.kss/topics/</code>.</p>
+        <p style="margin-bottom: 0;">This resolves the old inconsistency with the "<code>SUMMARY.md</code> existence is the marker — don't move folders" convention. Skills exclude archived topics from active listings; <code>grep 'status: archived'</code> is the trail. The old <code>.kss/archive/</code> folder is legacy.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 22px;">
+      <div class="card">
+        <h4 class="muted">Transient vs durable state</h4>
+        <p>Topic <code>STATE.md</code> keeps durable position in "Current Position" / "Blockers". Rot-prone environment facts (process up/down, ports, timestamps) go under a <code>## Scratch (transient — re-verify next session, safe to wipe)</code> fence. <code>wrap-up</code> writes there; <code>start-session</code> re-verifies it rather than re-asserting yesterday's environment as today's truth.</p>
+      </div>
+      <div class="card">
+        <h4 class="muted">Cross-topic handoffs</h4>
+        <p>When work needs to defer to a future or different topic, <code>complete-milestone</code> logs it (trigger-gated, same discipline as seeds) to <code>PROJECT.md</code> <code>## Carryover (cross-topic handoffs)</code>. <code>new-topic</code> reads that register and offers to claim inherited handoffs.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 36px;">Conventions that hold it together</h3>
+    <p class="muted" style="margin-bottom: 14px; max-width: 70ch;">Small rules with big consequences. These are why the framework stays simple as projects grow.</p>
+    <table class="fields">
+      <thead><tr><th>Rule</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>YAML frontmatter everywhere</td><td class="note">Easy to grep, parse, or filter by date / status programmatically.</td></tr>
+        <tr><td>Newest-on-top in LOG &amp; MILESTONES</td><td class="note">The most recent context is first when you skim; old entries scroll off naturally.</td></tr>
+        <tr><td>Slugs are kebab-case</td><td class="note">Filesystem-safe, URL-safe, consistent across topics / milestones / spikes.</td></tr>
+        <tr><td>ISO dates</td><td class="note"><code>YYYY-MM-DD</code> in frontmatter; <code>YYYYMMDD</code> as folder/file prefixes. Sorts correctly; groups cleanly in <code>ls</code>.</td></tr>
+        <tr><td>SUMMARY.md = shipped marker</td><td class="note">No status field to drift. The marker is structural — its existence is the signal.</td></tr>
+        <tr><td>status: archived = archived marker</td><td class="note">A flag in TOPIC.md, not a folder move. The directory stays put in <code>topics/</code>.</td></tr>
+        <tr><td>Seeds require a trigger</td><td class="note">No exceptions. Items without a trigger rot; <code>capture</code> refuses them — forcing you to say when the seed becomes actionable.</td></tr>
+        <tr><td>distill has four destinations</td><td class="note">CANONICAL-KB (learnings/gotchas) · STRUCTURE/CONVENTIONS <code>## Learned</code> fences (structure &amp; pattern facts) · VOCABULARY (terms).</td></tr>
+        <tr><td>Detect-and-offer</td><td class="note">Skills may detect a condition and <em>offer</em> the next action behind a confirm; they never auto-fire a state change.</td></tr>
+        <tr><td>Never auto-commit</td><td class="note">Skills modify files; you run <code>git</code>. Every change is a file you can review before it lands.</td></tr>
+        <tr><td>Single project pointer</td><td class="note"><code>active_topic</code> in PROJECT.md frontmatter; active milestone is derived. There is no <code>.kss/STATE.md</code>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       07 — Install
+       ════════════════════════════════════════════════════════ -->
+  <section id="install">
+    <div class="sec-head">
+      <span class="idx">07</span>
+      <h2>Install</h2>
+      <span class="count">v0.4.0</span>
+    </div>
+    <p class="sec-intro">Distributed via the <code>kss-plugins</code> marketplace. Inside Claude Code, three lines to install; then commands are invokable as <code>/kss:&lt;skill&gt;</code> in any project.</p>
+    <pre><span class="cm"># add the marketplace + install</span>
+<span class="cmd">/plugin marketplace add fnneves/kss-plugins</span>
+<span class="cmd">/plugin install kss@kss-plugins</span>
+
+<span class="cm"># your first project</span>
+<span class="cmd">/kss:scaffold-project</span>     <span class="cm"># once per project</span>
+<span class="cmd">/kss:map-codebase</span>         <span class="cm"># once, refresh after major refactors</span>
+<span class="cmd">/kss:new-topic</span>            <span class="cm"># when starting unrelated work</span>
+<span class="cmd">/kss:plan-milestone</span>       <span class="cm"># when scoping a chunk</span>
+<span class="cmd">/kss:start-session</span>        <span class="cm"># at session start</span></pre>
+    <p class="muted" style="margin-top: 18px;">To pull updates: <code>/plugin marketplace update kss-plugins</code> → <code>/plugin update kss@kss-plugins</code>. Hosted at <a href="https://fnneves.github.io/kss-plugins">fnneves.github.io/kss-plugins</a>. Want to tweak the skills? Fork the repo, clone it, and point <code>skill-autopsy</code> at it with <code>echo "$HOME/code/kss-plugins/plugins/kss" &gt; ~/.kss-source</code>.</p>
+  </section>
+
+  <footer>
+    <span class="k">"Detection is free. Mutation is confirmed. Trust is earned by being legible."</span>
+    <span>kss v0.4.0 · <a href="https://github.com/fnneves/kss-plugins">fnneves/kss-plugins</a></span>
+  </footer>
+
+</div>
+
+</body>
+</html>

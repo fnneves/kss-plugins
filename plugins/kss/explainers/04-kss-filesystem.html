@@ -436,7 +436,7 @@
       kss state is plain markdown under <code>.kss/</code> at the project root. No database, no compiled state, no hidden caches — every artifact is a file you can grep, diff, and commit. This page surfaces who writes which file, who reads it, how it changes over time, and which design choices are worth knowing about before you start naming things.
     </p>
     <p class="muted">
-      The findings below capture the design choices most people don't notice on first read. The tabs that follow are the full surface — switch across <code>root</code> / <code>codebase</code> / <code>topics</code> / <code>spikes &amp; archive</code> to see every file.
+      The findings below capture the design choices most people don't notice on first read. The tabs that follow are the full surface — switch across <code>root</code> / <code>codebase</code> / <code>topics</code> / <code>spikes</code> to see every file.
     </p>
   </header>
 
@@ -452,13 +452,13 @@
       </div>
       <div class="finding">
         <div class="f-label">Finding 02</div>
-        <h3>Two <code>STATE.md</code> files. Different jobs.</h3>
-        <p>Root <code>.kss/STATE.md</code> is a <strong>pointer</strong> — names which topic and milestone are active. Topic-level <code>STATE.md</code> is <strong>content</strong> — current focus and blockers. Same filename, opposite roles.</p>
+        <h3>One pointer, and it lives in frontmatter.</h3>
+        <p>There is no <code>.kss/STATE.md</code>. The single non-derivable fact — <code>active_topic</code> — sits in <code>PROJECT.md</code> frontmatter. The active milestone is <em>derived</em>: read that topic's <code>STATE.md</code> <code>active_milestone</code>. One pointer, zero double-writes.</p>
       </div>
       <div class="finding">
         <div class="f-label">Finding 03</div>
-        <h3><code>VOCABULARY.md</code> never gets overwritten.</h3>
-        <p>STACK / STRUCTURE / CONVENTIONS overwrite on every <code>map-codebase</code> rerun. VOCABULARY is the exception — append-only across runs, grown by <code>distill</code>. The shape changes; the language sticks.</p>
+        <h3>Reruns overwrite — except the parts that shouldn't.</h3>
+        <p>STACK overwrites whole on every <code>map-codebase</code> rerun; STRUCTURE / CONVENTIONS overwrite their <em>body</em> but preserve a <code>## Learned</code> fence. VOCABULARY is fully append-only. The shape changes; what <code>distill</code> taught it sticks.</p>
       </div>
     </div>
   </section>
@@ -475,11 +475,7 @@
         </div>
         <div class="tree-row">
           <span class="tree-path">├── PROJECT.md</span>
-          <span class="pill pill-oat">identity</span>
-        </div>
-        <div class="tree-row">
-          <span class="tree-path">├── STATE.md</span>
-          <span class="pill pill-sky">pointer</span>
+          <span class="pill pill-sky">identity + pointer</span>
         </div>
         <div class="tree-row">
           <span class="tree-path">├── CANONICAL-KB.md</span>
@@ -491,15 +487,11 @@
         </div>
         <div class="tree-row dir">
           <span class="tree-path">├── topics/</span>
-          <span class="tree-meta">one folder per topic · 5 state files + milestones/</span>
+          <span class="tree-meta">one folder per topic · 5 state files + milestones/ · archived stay put</span>
         </div>
         <div class="tree-row dir">
-          <span class="tree-path">├── spikes/</span>
+          <span class="tree-path">└── spikes/</span>
           <span class="tree-meta">date-prefixed folders · throwaway with verdict</span>
-        </div>
-        <div class="tree-row dir">
-          <span class="tree-path">└── archive/</span>
-          <span class="tree-meta">retired topics moved here on <code>--archive-topic</code></span>
         </div>
       </div>
     </div>
@@ -510,16 +502,16 @@
        ============================================================ -->
   <section>
     <div class="tab-bar" role="tablist">
-      <button class="tab is-active" data-target="tab-root" role="tab">project root <span class="tab-count">3</span></button>
+      <button class="tab is-active" data-target="tab-root" role="tab">project root <span class="tab-count">2</span></button>
       <button class="tab" data-target="tab-codebase" role="tab">codebase <span class="tab-count">4</span></button>
       <button class="tab" data-target="tab-topics" role="tab">topics <span class="tab-count">8</span></button>
-      <button class="tab" data-target="tab-spikes" role="tab">spikes &amp; archive <span class="tab-count">2</span></button>
+      <button class="tab" data-target="tab-spikes" role="tab">spikes <span class="tab-count">1</span></button>
     </div>
 
     <!-- ─── Tab 1: Project root ─── -->
     <div class="tab-panel is-active" id="tab-root">
       <p class="panel-intro">
-        Three files sit at the very root of <code>.kss/</code>. They name the project, point to the active work, and accumulate cross-topic knowledge over time.
+        Two files sit at the very root of <code>.kss/</code>. <code>PROJECT.md</code> carries identity, the topics index, the single active pointer, and cross-topic handoffs; <code>CANONICAL-KB.md</code> accumulates distilled knowledge over time. There is no longer a <code>.kss/STATE.md</code> — the project pointer moved into <code>PROJECT.md</code> frontmatter.
       </p>
       <div class="table-wrap">
         <table class="fields">
@@ -531,19 +523,12 @@
               <td class="path">
                 .kss/PROJECT.md
                 <span class="pill pill-oat" data-tip="Durable description that rarely changes after the first write.">identity</span>
+                <span class="pill pill-sky" data-tip="The single project pointer lives in this file's frontmatter — active_topic (plus last_session / last_updated). The active milestone is derived from that topic's STATE.md, not stored here.">pointer · frontmatter</span>
+                <span class="pill pill-olive" data-tip="The ## Carryover section is an append-style register of cross-topic handoffs — deferred-to-future-topic items, each trigger-gated like a seed.">append · ## Carryover</span>
               </td>
-              <td class="skills">scaffold-project</td>
+              <td class="skills">scaffold-project · new-topic · complete-milestone</td>
               <td class="skills">all skills</td>
-              <td class="notes">Durable project identity + topics index. Rarely edited after scaffold. YAML frontmatter + short prose section.</td>
-            </tr>
-            <tr>
-              <td class="path">
-                .kss/STATE.md
-                <span class="pill pill-sky" data-tip="Tiny file that names what's currently active. Read often, written rarely.">pointer</span>
-              </td>
-              <td class="skills">new-topic · plan-milestone · complete-milestone</td>
-              <td class="skills">start-session</td>
-              <td class="notes">Project-level pointer — names the active topic slug and active milestone slug. Tiny file. Two-line frontmatter is the whole content.</td>
+              <td class="notes">Durable identity + topics index. <strong>Frontmatter holds <code>active_topic</code></strong> — the single project pointer (with <code>last_session</code> / <code>last_updated</code>). A <code>## Carryover (cross-topic handoffs)</code> section collects trigger-gated items logged by <code>complete-milestone</code> and claimed by <code>new-topic</code>. Archived topics' rows move to a <code>## Archived Topics</code> heading here.</td>
             </tr>
             <tr>
               <td class="path">
@@ -552,7 +537,7 @@
               </td>
               <td class="skills">distill</td>
               <td class="skills">all skills (implicit context)</td>
-              <td class="notes">Durable insights distilled from LOG / SEEDS / spike findings across all topics. Append-only. The closest thing to "what we've learned about this project."</td>
+              <td class="notes">Durable learnings &amp; gotchas distilled from LOG / SEEDS / spike findings across all topics. One of <code>distill</code>'s four destinations (the others: codebase <code>## Learned</code> fences and <code>VOCABULARY.md</code>). The closest thing to "what we've learned about this project."</td>
             </tr>
           </tbody>
         </table>
@@ -582,20 +567,22 @@
             <tr>
               <td class="path">
                 codebase/STRUCTURE.md
-                <span class="pill pill-clay" data-tip="Rewritten in full on each run of the producer skill.">overwrite</span>
+                <span class="pill pill-clay" data-tip="The auto-generated body is rewritten in full on each map-codebase run.">overwrite · body</span>
+                <span class="pill pill-olive" data-tip="The ## Learned (append-only — preserved across map-codebase runs) fence holds structure facts written by distill. map-codebase regenerates the body but PRESERVES this fence.">preserved · ## Learned</span>
               </td>
-              <td class="skills">map-codebase</td>
+              <td class="skills">map-codebase (body) · distill (## Learned)</td>
               <td class="skills">start-session · plan-milestone</td>
-              <td class="notes">Directory tree, module map, entry points, where the bodies are buried. Overwrites on rerun.</td>
+              <td class="notes">Directory tree, module map, entry points. <strong>Body overwrites on rerun</strong>; a <code>## Learned</code> fence (structure facts written by <code>distill</code>) is <strong>preserved across reruns</strong> — without that, remapping would wipe distilled knowledge.</td>
             </tr>
             <tr>
               <td class="path">
                 codebase/CONVENTIONS.md
-                <span class="pill pill-clay" data-tip="Rewritten in full on each run of the producer skill.">overwrite</span>
+                <span class="pill pill-clay" data-tip="The auto-generated body is rewritten in full on each map-codebase run.">overwrite · body</span>
+                <span class="pill pill-olive" data-tip="The ## Learned (append-only — preserved across map-codebase runs) fence holds pattern facts written by distill. map-codebase regenerates the body but PRESERVES this fence.">preserved · ## Learned</span>
               </td>
-              <td class="skills">map-codebase</td>
+              <td class="skills">map-codebase (body) · distill (## Learned)</td>
               <td class="skills">start-session · plan-milestone</td>
-              <td class="notes">Naming, formatting, idioms specific to this codebase. The "don't fight the style" reference.</td>
+              <td class="notes">Naming, formatting, idioms. The "don't fight the style" reference. <strong>Body overwrites on rerun</strong>; the <code>## Learned</code> fence (pattern facts from <code>distill</code>) is <strong>preserved across reruns</strong>.</td>
             </tr>
             <tr>
               <td class="path">
@@ -626,19 +613,22 @@
               <td class="path">
                 topics/&lt;slug&gt;/TOPIC.md
                 <span class="pill pill-oat" data-tip="Durable description that rarely changes after the first write.">identity</span>
+                <span class="pill pill-slate" data-tip="Archiving is a status flag, not a folder move. status: archived in this frontmatter is the marker — the directory stays in topics/. grep 'status: archived' is the trail.">marker · status</span>
               </td>
-              <td class="skills">new-topic</td>
+              <td class="skills">new-topic · complete-milestone <code>--archive-topic</code></td>
               <td class="skills">start-session · plan-milestone · complete-milestone</td>
-              <td class="notes">Topic identity, success bar, key decisions. Stable once set — only edit when scope genuinely changes.</td>
+              <td class="notes">Topic identity, success bar, key decisions. Frontmatter <code>status: active|archived</code> — <strong>archiving flips this flag, it does not move the folder</strong>. Skills exclude <code>status: archived</code> topics from active listings. Stable otherwise — edit only when scope genuinely changes.</td>
             </tr>
             <tr>
               <td class="path">
                 topics/&lt;slug&gt;/STATE.md
-                <span class="pill pill-clay" data-tip="Refreshed periodically — overwritten with current state.">content</span>
+                <span class="pill pill-clay" data-tip="Durable position is refreshed periodically — Current Position / Blockers are overwritten with current state.">content · durable</span>
+                <span class="pill pill-sky" data-tip="Frontmatter active_milestone is the SINGLE SOURCE OF TRUTH for which milestone is active. The project pointer (active_topic in PROJECT.md) plus this value together resolve the active milestone.">pointer · active_milestone</span>
+                <span class="pill pill-muted" data-tip="The ## Scratch (transient — re-verify next session, safe to wipe) fence holds rot-prone env facts (ports, process up/down, timestamps). start-session re-verifies it rather than re-asserting yesterday's environment.">transient · ## Scratch</span>
               </td>
               <td class="skills">wrap-up · start-session</td>
               <td class="skills">start-session</td>
-              <td class="notes">Current focus + blockers for THIS topic (not the project). Overwritten on each wrap-up. Different role from root STATE.md despite the same name.</td>
+              <td class="notes">Current Position + Blockers for THIS topic (durable). Frontmatter <code>active_milestone</code> is the <strong>single source of truth</strong> for the active milestone. A <code>## Scratch</code> fence isolates rot-prone env facts; <code>start-session</code> <strong>re-verifies</strong> Scratch instead of re-asserting it. (There is no project-level STATE.md.)</td>
             </tr>
             <tr>
               <td class="path">
@@ -699,10 +689,10 @@
       </div>
     </div>
 
-    <!-- ─── Tab 4: Spikes & Archive ─── -->
+    <!-- ─── Tab 4: Spikes ─── -->
     <div class="tab-panel" id="tab-spikes">
       <p class="panel-intro">
-        Spikes are throwaway exploration with verdicts; archive is where retired topics go. Both live outside the active topic tree so they don't pollute current work.
+        Spikes are throwaway exploration with verdicts — they live outside the active topic tree so they don't pollute current work. (Wondering where archived topics go? They don't move — see the note below.)
       </p>
       <div class="table-wrap">
         <table class="fields">
@@ -721,12 +711,12 @@
             </tr>
             <tr>
               <td class="path">
-                archive/&lt;topic-slug&gt;/
-                <span class="pill pill-muted" data-tip="Folder relocated here by --archive-topic. Outside the active workflow.">moved</span>
+                .kss/archive/
+                <span class="pill pill-muted" data-tip="No longer created. Archiving is now a status: archived flag in TOPIC.md plus a row move to PROJECT.md ## Archived Topics — the topic directory stays in topics/.">legacy · not created</span>
               </td>
-              <td class="skills">complete-milestone <code>--archive-topic</code></td>
-              <td class="skills">(history reference only)</td>
-              <td class="notes">A retired topic's entire folder is moved here. Preserves shape (TOPIC.md, LOG.md, milestones, etc.). Not read by active skills — it's an audit trail.</td>
+              <td class="skills">—</td>
+              <td class="skills">(collision checks only)</td>
+              <td class="notes"><strong>No longer a folder move.</strong> Archiving sets <code>status: archived</code> in <code>TOPIC.md</code> and moves the topic's row to <code>PROJECT.md</code> <code>## Archived Topics</code> — the directory <strong>stays in <code>topics/</code></strong>. <code>.kss/archive/</code> is legacy only; existing dirs are left in place and still checked for slug collisions.</td>
             </tr>
           </tbody>
         </table>
@@ -785,15 +775,36 @@
           <strong>Active vs. shipped</strong> milestone is marked by <code>SUMMARY.md</code> presence. No status flag.
         </li>
         <li>
+          <strong>Active vs. archived topic</strong> is a <code>status: archived</code> flag in <code>TOPIC.md</code> — not a folder move.
+          <span class="note">The directory stays in <code>topics/</code>; <code>grep 'status: archived'</code> is the trail. Resolves the old inconsistency with "presence is the marker — don't move folders."</span>
+        </li>
+        <li>
           <strong>Seeds require triggers</strong>. No exceptions.
           <span class="note">Items without trigger conditions rot — capture refuses them.</span>
+        </li>
+        <li>
+          <strong>Detect-and-offer, never silently mutate</strong>.
+          <span class="note">Skills detect a condition and <em>offer</em> the next action behind a one-keystroke confirm; they never auto-fire a state change.</span>
         </li>
         <li>
           <strong>Never auto-commit</strong>. Skills modify files; you commit.
           <span class="note">Trust is earned by being legible.</span>
         </li>
         <li>
-          <strong>Two-level state</strong>. Root <code>STATE.md</code> = pointer. Topic <code>STATE.md</code> = content.
+          <strong>Single project pointer</strong>. <code>active_topic</code> lives in <code>PROJECT.md</code> frontmatter — there is no <code>.kss/STATE.md</code>.
+          <span class="note">The active milestone is <em>derived</em> from the active topic's <code>STATE.md</code> <code>active_milestone</code> (its single source of truth). <code>start-session</code> migrates any legacy <code>.kss/STATE.md</code> on first run.</span>
+        </li>
+        <li>
+          <strong>Durable vs. transient state</strong>. Topic <code>STATE.md</code> keeps durable Position/Blockers; rot-prone env facts go under a <code>## Scratch</code> fence.
+          <span class="note"><code>start-session</code> re-verifies Scratch rather than re-asserting it.</span>
+        </li>
+        <li>
+          <strong>Cross-topic handoffs</strong> live in <code>PROJECT.md</code> <code>## Carryover</code>.
+          <span class="note"><code>complete-milestone</code> logs trigger-gated items there; <code>new-topic</code> offers to claim them.</span>
+        </li>
+        <li>
+          <strong><code>distill</code> has four destinations</strong>.
+          <span class="note">Learnings/gotchas → CANONICAL-KB; structure &amp; pattern facts → codebase <code>## Learned</code> fences (preserved across <code>map-codebase</code> reruns); terms → VOCABULARY.</span>
         </li>
       </ul>
     </div>
@@ -801,7 +812,7 @@
 
   <footer>
     <span class="k">The filesystem is the state. No database, no surprises.</span>
-    <span>kss v0.2.0 · 17 file types · 4 surfaces</span>
+    <span>kss v0.4.0 · 13 skills · 6 layers</span>
   </footer>
 
 </div>

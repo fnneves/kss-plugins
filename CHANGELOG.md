@@ -8,6 +8,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each pl
 
 ## kss
 
+### [0.4.0] - 2026-06-09
+
+**Theme: detect-and-offer + state-model simplification.** Cut command/flag/file ceremony without weakening the durable record. Skills now *detect* a condition and *offer* the next action behind a one-keystroke confirm, instead of making you remember a command or flag. Governing principle: detection is free, mutation is confirmed — fully consistent with the existing "no auto-routing / never auto-commit" rules.
+
+**Lifecycle:**
+- `complete-milestone` now *offers* to archive a finished topic at close; `--archive-topic` is demoted from a must-remember flag to an optional shortcut.
+- `complete-milestone` logs deferred-to-future-topic items to a new `## Carryover (cross-topic handoffs)` register in `PROJECT.md` — trigger-gated, same discipline as seeds.
+- `new-topic` no longer force-activates the new topic — it *offers* activation (or register-and-stay-put). On creation it reads `PROJECT.md` `## Carryover` and offers to claim inherited handoffs.
+- `plan-milestone`'s "active milestone in flight" hard refusal is now a prompt (close / switch / plan anyway). New `--topic <slug>` plans a parallel/non-active track without moving the active pointer.
+
+**Session:**
+- `wrap-up` offers to close the milestone when all PLAN tasks are `✓` (tasks-done is the *trigger*; `complete-milestone`'s success-criteria interview stays the *gate* and still authors `SUMMARY.md`). It routes rot-prone environmental facts to a `## Scratch (transient — re-verify next session, safe to wipe)` fence in topic STATE.md instead of mixing them into durable Blockers.
+- `start-session` re-verifies any `## Scratch` facts ("last session noted — still true?") instead of re-asserting yesterday's environment as today's truth.
+- `new-topic`'s STATE.md template now ships with the `## Scratch` fence.
+
+**Knowledge / Setup:**
+- `distill` routes insights across four destinations instead of two: `CANONICAL-KB.md` (learnings/gotchas), codebase `STRUCTURE.md` & `CONVENTIONS.md` `## Learned` fences (structure & pattern facts), and `VOCABULARY.md` (terms).
+- `map-codebase` now preserves the `## Learned (append-only — preserved across map-codebase runs)` fence in `STRUCTURE.md`/`CONVENTIONS.md` across reruns (the auto-generated bodies still regenerate). The two changes ship together — without the preservation, distilled content would be wiped on the next remap.
+
+**State model (was Tier 3):**
+- **Single project pointer.** `.kss/STATE.md` is eliminated. The one non-derivable fact — `active_topic` — now lives in `.kss/PROJECT.md` frontmatter (with `last_session`/`last_updated`). The active milestone is *derived* from the active topic's `STATE.md` `active_milestone` (its single source of truth), removing a double-write that previously spanned five skills. `scaffold-project` no longer creates `.kss/STATE.md`.
+- **Archive is a status flag, not a folder move.** Archiving a topic sets `status: archived` in its `TOPIC.md` and moves its `PROJECT.md` row to `## Archived Topics`; the directory stays at `.kss/topics/{slug}/`. `.kss/archive/` is no longer created (legacy). This resolves the prior inconsistency with the "`SUMMARY.md`'s existence is the shipped marker — don't move folders" convention. Skills exclude `status: archived` topics from active listings (`grep 'status: archived'` is the trail).
+- **Migration (automatic, one-time).** On first run in an existing project, `start-session` migrates a legacy `.kss/STATE.md` — copies `active_topic` into `PROJECT.md` frontmatter and deletes the old file. Legacy `.kss/archive/<topic>/` dirs are left in place; collision checks still consider them.
+
+**Closes** these open `skill-autopsy` threads: transient-vs-durable-state (`wrap-up` + `start-session`), cross-topic handoffs (`complete-milestone` + `new-topic`), parallel-track refusals (`plan-milestone` + `new-topic`), and `distill` destination-routing.
+
+**Deferred (separate track):** the HTML-companion ideas (`plan-milestone --html`, a live `explore-notebook` "Maestro dashboard") — feature work, not ceremony; deserves its own proposal once `explore-notebook` has mileage.
+
 ### [0.3.0] - 2026-06-09
 
 **Skills added:**
