@@ -86,19 +86,19 @@ One of the eight. If unsure, ask. Each reference file has:
 ### 3. Choose where the file goes — and how it'll be opened
 
 - **For exploration during a conversation**: `/tmp/explorer-{topic}.html`. Throwaway by design. Mention to the user it's at `/tmp` so they don't expect it to persist.
-- **For a deliverable they want to keep**: ask them where. Common: `.planning/explorers/`, `docs/`, repo root.
+- **For a deliverable they want to keep**: ask them where. Common: `.kss/topics/<topic>/explorers/`, `docs/`, repo root.
 - **Real-data sidecar**: if the page reads from a JSON snapshot, write the snapshot next to the HTML and load via `<script src="...">` (works under `file://`; `fetch()` does not).
 
 **How will it be opened?** This determines whether you serve or just write the file:
 
 - **Laptop file browser, single use, no live edits expected** → `file://<absolute-path>` is fine.
-- **Anything else** — phone / other device on the LAN, a clickable URL in a chat UI, remote machine, expected iteration during the session, page reads sibling JSON via `fetch()`, page is a phone-companion app (UAT checklist, mobile sketch, etc.) — **serve it.** `file://` cannot be reached from another device, cannot be reliably clicked from many chat UIs, blocks `fetch()`, and does not auto-reload when you edit. The default for any persistent `.planning/` or `docs/` deliverable should be to **serve via the bundled `serve.py`** (see "Interactive mode" below) even if the feedback widget is not needed — live-reload alone justifies it.
+- **Anything else** — phone / other device on the LAN, a clickable URL in a chat UI, remote machine, expected iteration during the session, page reads sibling JSON via `fetch()`, page is a phone-companion app (UAT checklist, mobile sketch, etc.) — **serve it.** `file://` cannot be reached from another device, cannot be reliably clicked from many chat UIs, blocks `fetch()`, and does not auto-reload when you edit. The default for any persistent `.kss/` or `docs/` deliverable should be to **serve via the bundled `serve.py`** (see "Interactive mode" below) even if the feedback widget is not needed — live-reload alone justifies it.
 
 Quick decision: if you're about to give the user a `file://` link, ask yourself "can they open this from their phone?" If no, serve it instead.
 
 ### 4. Draft the HTML
 
-One file. No build step. CDN policy is tiered by destination: `/tmp/` throwaways may pull from CDN freely (richer output, used now and closed); anything saved to `.planning/`, `docs/`, or the repo must be offline-safe so it still opens on a plane in six months — either pure vanilla, or vendor the library inline. See "Rich libraries" below for what to reach for when vanilla isn't enough.
+One file. No build step. CDN policy is tiered by destination: `/tmp/` throwaways may pull from CDN freely (richer output, used now and closed); anything saved to a persistent location (`.kss/topics/<topic>/explorers/`, `docs/`, the repo) must be offline-safe so it still opens on a plane in six months — either pure vanilla, or vendor the library inline. See "Rich libraries" below for what to reach for when vanilla isn't enough.
 
 **Design system: Editorial HTML Design System.** The skill ships with two CSS files:
 
@@ -107,7 +107,7 @@ One file. No build step. CDN policy is tiered by destination: `/tmp/` throwaways
 
 `assets/template.html` is the canonical skeleton. Two patterns for using the CSS:
 
-- **Linked** (`.planning/`, `docs/` deliverables): copy both `.css` files next to the HTML and `<link>` them. Smaller HTML; consistent across pages; survives offline because the files are co-located.
+- **Linked** (`.kss/`, `docs/` deliverables): copy both `.css` files next to the HTML and `<link>` them. Smaller HTML; consistent across pages; survives offline because the files are co-located.
 - **Inlined** (`/tmp/` throwaways): paste the contents of both files into a single `<style>` block inside the HTML. One file, no co-located assets.
 
 Either way, **start from `assets/template.html`** — do not re-derive the layout primitives.
@@ -332,7 +332,7 @@ Vanilla JS + the template primitives cover most explorers. When the topic genuin
 
 **When NOT to reach for these:** if the page is a static comparison or matrix, vanilla + the template primitives is faster to write, smaller, and offline. Don't pull D3 to render a 6-row table.
 
-**If the deliverable needs to persist** (`.planning/`, `docs/`, repo): either drop back to vanilla, or download the library file (`curl -o lib.js https://...`) and `<script src="lib.js">` it as a sidecar so the bundle survives a CDN going dark.
+**If the deliverable needs to persist** (`.kss/`, `docs/`, repo): either drop back to vanilla, or download the library file (`curl -o lib.js https://...`) and `<script src="lib.js">` it as a sidecar so the bundle survives a CDN going dark.
 
 ## Iteration pattern
 
@@ -391,4 +391,4 @@ explore-notebook/
 
 Read the relevant references file when you've picked a category. Don't read all eight — they're independent.
 
-**Working with the assets**: for a `/tmp/` throwaway, inline both CSS files into a single `<style>` block. For a `.planning/`/`docs/` deliverable, copy both `.css` files next to the HTML and use the `<link>` pattern in `template.html`. Either way, do not redefine the tokens or the primitives.
+**Working with the assets**: for a `/tmp/` throwaway, inline both CSS files into a single `<style>` block. For a persistent (`.kss/` / `docs/`) deliverable, copy both `.css` files next to the HTML and use the `<link>` pattern in `template.html`. Either way, do not redefine the tokens or the primitives.

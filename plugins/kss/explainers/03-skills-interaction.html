@@ -511,7 +511,7 @@
 
   <footer>
     <span class="k">Lifecycle is the spine. Data is the connective tissue.</span>
-    <span>kss v0.4.0 · 13 skills · 6 layers</span>
+    <span>kss v0.4.1 · 13 skills · 6 layers</span>
   </footer>
 
 </div>
@@ -625,10 +625,11 @@ const SKILLS = {
       '.kss/topics/<topic>/STATE.md → active_milestone (derived) + focus, blockers, Scratch',
       'active PLAN.md (open tasks)',
       '.kss/topics/<topic>/LOG.md (last ~5 entries)',
-      'SEEDS.md (surface triggered seeds)'
+      'SEEDS.md (surface triggered seeds)',
+      '.kss/spikes/*/README.md (nudge stale `verdict: pending` spikes)'
     ],
     feeds: ['wrap-up', 'spike', 'capture', 'explore-html', 'explore-notebook'],
-    fedBy: ['scaffold-project', 'map-codebase', 'new-topic', 'plan-milestone', 'wrap-up'],
+    fedBy: ['scaffold-project', 'map-codebase', 'new-topic', 'plan-milestone', 'wrap-up', 'spike'],
     prevents: 'Cold starts where you re-derive "where was I" from git log + memory. Re-asserting yesterday\'s env state as today\'s — Scratch facts are re-verified, never parroted.'
   },
   'spike': {
@@ -640,9 +641,9 @@ const SKILLS = {
       'optional scratch files inside the spike folder'
     ],
     reads: ['(none — independent exploration; folder stays forever as the record)'],
-    feeds: ['plan-milestone', 'new-topic', 'complete-milestone', 'distill'],
+    feeds: ['plan-milestone', 'new-topic', 'complete-milestone', 'distill', 'start-session'],
     fedBy: [],
-    prevents: 'Carrying unverified ideas into PLAN.md. Sunk-cost commitment to approaches that don\'t actually work. A spike left `pending` forever.'
+    prevents: 'Carrying unverified ideas into PLAN.md. Sunk-cost commitment to approaches that don\'t actually work. A spike left `pending` forever (start-session nudges stale ones).'
   },
   'wrap-up': {
     layer: 'session',
@@ -669,8 +670,8 @@ const SKILLS = {
     when: 'Anytime — a seed, idea, or scratch note crosses your mind. Drop it before flow breaks. Seeds require a trigger condition; capture refuses seeds without one.',
     writes: [
       '.kss/topics/<topic>/SEEDS.md (seeds — every row carries a mandatory trigger)',
-      '.kss/topics/<topic>/LOG.md (ideas, or a bottom `## Scratch` section)',
-      'rarely: PROJECT.md scratch (--project-level)'
+      '.kss/topics/<topic>/LOG.md (ideas, or a bottom `## Jotted` section)',
+      'rarely: a PROJECT.md `## Carryover` row (--project-level, trigger-gated)'
     ],
     reads: ['.kss/PROJECT.md (active_topic; asks which topic if null)'],
     feeds: ['distill'],

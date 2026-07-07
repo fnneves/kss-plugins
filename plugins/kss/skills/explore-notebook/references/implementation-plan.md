@@ -47,7 +47,7 @@ A 2-week threaded-comments feature plan:
 
 ## The "where this page exists" question
 
-This page is almost always a persistent deliverable, not a `/tmp/` throwaway. Default location: `.planning/<phase-id>/PLAN-companion.html` (next to PLAN.md). Linked from PLAN.md's frontmatter or top section. Served via the bundled `serve.py` so the team can open it from a phone during planning meetings — live-reload also makes iteration cheap if scope shifts.
+This page is almost always a persistent deliverable, not a `/tmp/` throwaway. Default location: next to PLAN.md — in kss, `.kss/topics/<topic>/milestones/<version>-<slug>/PLAN-companion.html`. Linked from PLAN.md's frontmatter or top section. Served via the bundled `serve.py` so the team can open it from a phone during planning meetings — live-reload also makes iteration cheap if scope shifts.
 
 If you're in a repo without a planning workflow: `docs/plans/<feature>.html` is the conventional spot.
 
@@ -57,10 +57,10 @@ Often this page is **derived from** an existing PLAN.md or planning conversation
 
 ```bash
 # Pull the plan's task headings to seed milestones
-grep -E '^## [Mm]ilestone|^### [Tt]ask' .planning/<phase>/PLAN.md
+grep -E '^## [Mm]ilestone|^### [Tt]ask' <path-to>/PLAN.md
 
 # Pull the file list to scope the surfaces-touched stat
-grep -hoE '`[^`]+`' .planning/<phase>/PLAN.md | sort -u
+grep -hoE '`[^`]+`' <path-to>/PLAN.md | sort -u
 ```
 
 If no PLAN.md yet, the agent and user should sketch the milestones in chat first, then the agent generates the page. Resist drafting the visual before the substance is agreed — the milestone cards' equal-weight visual implies "these are agreed," and shipping it as a probe muddles the artifact's purpose.

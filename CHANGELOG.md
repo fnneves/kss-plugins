@@ -8,6 +8,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each pl
 
 ## kss
 
+### [0.4.1] - 2026-07-07
+
+**Theme: hygiene sweep.** No new mechanics — prompt-weight reduction, broken-contract fixes, and detect-and-offer consistency. From the 2026-07-07 skill-alignment review (`proposals/2026-07-07-skill-alignment-review.md`, Findings B/C1–C3 + nits).
+
+**Scar-tissue sweep (B):**
+- Removed the post-0.4.0 negative assertions ("there is no `.kss/STATE.md`", "no project-level milestone pointer", "`.kss/archive/` is legacy") from `scaffold-project`, `new-topic`, `plan-milestone`, `complete-milestone`, `start-session`, and the README layout comment. The state model is now stated positively, once. Kept: the `start-session` migration step (the one place that handles a legacy file) and the README "Single project pointer" line. `new-topic`'s legacy-`.kss/archive/` collision check also stays.
+
+**Cross-skill contract fixes (C1–C3):**
+- `start-session` now surfaces stale `verdict: pending` spikes (~2+ weeks) alongside triggered seeds — making good on the promise `spike`'s conventions had been making all along. New optional "Pending Spikes" block in the session brief.
+- `capture --project-level` no longer points at a nonexistent "PROJECT.md scratch" — a genuinely cross-topic item now lands as a trigger-gated `## Carryover` row (Source `capture`, Target slug or `TBD`), reusing the register `new-topic` already claims from. Only seeds go project-level; ideas/scratch always need a topic.
+- Renamed capture's LOG.md jot section `## Scratch` → `## Jotted`, ending the name collision with STATE.md's `## Scratch (transient …)` fence — two different lifecycles no longer share a name.
+
+**Detect-and-offer consistency:**
+- `scaffold-project` now *offers* to run `map-codebase` at the end (was a "next steps" sentence).
+- `new-topic` (activate branch) now *offers* to hand into `plan-milestone` (was a "next steps" sentence).
+- `distill` lazy-creates a missing `CANONICAL-KB.md` from the scaffold template instead of refusing — same discipline as its other destinations.
+
+**Docs / drift:**
+- Purged the foreign `.planning/` path from both `explore-*` skills (8 spots) and `explore-notebook`'s `implementation-plan.md` reference — persistent-deliverable guidance now names `.kss/topics/<topic>/explorers/` (or the milestone folder for PLAN companions) and `docs/`.
+- Trimmed `distill`'s frontmatter description (the four-destination matrix is body material, not trigger material).
+- `wrap-up` conventions now note the PROJECT.md/topic-STATE.md `last_session` double-stamp is deliberate denormalization.
+- Marked the 2026-06-09 detect-and-offer proposal `shipped in 0.4.0`.
+
+**README + explainers de-fluff (follow-up sweep):**
+- Plugin README: slimmed the commands table to one-liners (the detail lives in Key conventions), dropped the mermaid flowchart and its edge-cases paragraph (the daily-flow block and the hosted explainers cover routing), dropped the "Plugin structure" section (duplicated the root README), and cut the origin-story paragraph to one line (full version stays in the root README).
+- Explainers: removed the repeated "there is no `.kss/STATE.md` / `.kss/archive/` is legacy (removed in v0.4.0)" scar tissue from `00` and `04` (one canonical state-model mention per page remains); fixed spike verdict wording to promote / kill / pivot (`00`, `04`); updated `03`'s capture card (`## Jotted`, Carryover instead of the removed "PROJECT.md scratch") and start-session/spike edges for the 0.4.1 pending-spike nudge; corrected `00`'s capture card routing (seeds → SEEDS.md, ideas/notes → LOG.md); footers bumped to v0.4.1.
+
 ### [0.4.0] - 2026-06-09
 
 **Theme: detect-and-offer + state-model simplification.** Cut command/flag/file ceremony without weakening the durable record. Skills now *detect* a condition and *offer* the next action behind a one-keystroke confirm, instead of making you remember a command or flag. Governing principle: detection is free, mutation is confirmed — fully consistent with the existing "no auto-routing / never auto-commit" rules.

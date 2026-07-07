@@ -511,7 +511,7 @@
     <!-- ─── Tab 1: Project root ─── -->
     <div class="tab-panel is-active" id="tab-root">
       <p class="panel-intro">
-        Two files sit at the very root of <code>.kss/</code>. <code>PROJECT.md</code> carries identity, the topics index, the single active pointer, and cross-topic handoffs; <code>CANONICAL-KB.md</code> accumulates distilled knowledge over time. There is no longer a <code>.kss/STATE.md</code> — the project pointer moved into <code>PROJECT.md</code> frontmatter.
+        Two files sit at the very root of <code>.kss/</code>. <code>PROJECT.md</code> carries identity, the topics index, the single active pointer, and cross-topic handoffs; <code>CANONICAL-KB.md</code> accumulates distilled knowledge over time. The project pointer lives in <code>PROJECT.md</code> frontmatter — no separate state file.
       </p>
       <div class="table-wrap">
         <table class="fields">
@@ -703,11 +703,11 @@
             <tr>
               <td class="path">
                 spikes/YYYYMMDD-&lt;slug&gt;/README.md
-                <span class="pill pill-clay" data-tip="Throwaway exploration ending in a keep / drop / promote verdict.">content · verdict</span>
+                <span class="pill pill-clay" data-tip="Throwaway exploration ending in a promote / kill / pivot verdict.">content · verdict</span>
               </td>
               <td class="skills">spike</td>
-              <td class="skills">distill · complete-milestone</td>
-              <td class="notes">Question, approach, findings, and a <strong>verdict</strong> (keep / drop / promote). Date-prefixed folder name. Throwaway by design — the verdict is what matters, not the artifact.</td>
+              <td class="skills">distill · complete-milestone · start-session</td>
+              <td class="notes">Question, approach, findings, and a <strong>verdict</strong> (promote / kill / pivot). Date-prefixed folder name. Throwaway by design — the verdict is what matters, not the artifact; <code>start-session</code> nudges stale <code>pending</code> ones.</td>
             </tr>
             <tr>
               <td class="path">
@@ -776,7 +776,7 @@
         </li>
         <li>
           <strong>Active vs. archived topic</strong> is a <code>status: archived</code> flag in <code>TOPIC.md</code> — not a folder move.
-          <span class="note">The directory stays in <code>topics/</code>; <code>grep 'status: archived'</code> is the trail. Resolves the old inconsistency with "presence is the marker — don't move folders."</span>
+          <span class="note">The directory stays in <code>topics/</code>; <code>grep 'status: archived'</code> is the trail.</span>
         </li>
         <li>
           <strong>Seeds require triggers</strong>. No exceptions.
@@ -791,7 +791,7 @@
           <span class="note">Trust is earned by being legible.</span>
         </li>
         <li>
-          <strong>Single project pointer</strong>. <code>active_topic</code> lives in <code>PROJECT.md</code> frontmatter — there is no <code>.kss/STATE.md</code>.
+          <strong>Single project pointer</strong>. <code>active_topic</code> lives in <code>PROJECT.md</code> frontmatter.
           <span class="note">The active milestone is <em>derived</em> from the active topic's <code>STATE.md</code> <code>active_milestone</code> (its single source of truth). <code>start-session</code> migrates any legacy <code>.kss/STATE.md</code> on first run.</span>
         </li>
         <li>
@@ -812,7 +812,7 @@
 
   <footer>
     <span class="k">The filesystem is the state. No database, no surprises.</span>
-    <span>kss v0.4.0 · 13 skills · 6 layers</span>
+    <span>kss v0.4.1 · 13 skills · 6 layers</span>
   </footer>
 
 </div>

@@ -50,12 +50,12 @@ Topics are the namespace boundary for unrelated work tracks (e.g. `polymarket-bo
 5. **Update `.kss/PROJECT.md`.**
    - Under `## Topics`, add a row: `- **{slug}** — {description}{ (active) only if activating}`.
    - Always add the topic here, whether or not it becomes active.
-   - **[activate] only:** set `active_topic: {slug}` in the frontmatter. (There is **no** project-level `active_milestone` — the new topic's own `STATE.md` already carries `active_milestone: null`, which is the single source of truth.)
+   - **[activate] only:** set `active_topic: {slug}` in the frontmatter. (The new topic's own `STATE.md` carries `active_milestone: null` — the single source of truth for its milestone.)
    - **[keep current]:** leave the frontmatter `active_topic` unchanged — it stays on `{current-topic}`. The new topic is registered (PROJECT.md row + its own files) but not active.
    - Bump `last_updated` in frontmatter.
 
-6. **Tell the user.**
-   - **[activate]:** "Topic `{slug}` created and set as active. Next: run `plan-milestone` to scope your first milestone."
+6. **Tell the user — and offer the next step (SUGGEST-AND-CONFIRM).**
+   - **[activate]:** "Topic `{slug}` created and set as active. Plan the first milestone now? [y/N]" — on yes, hand into `plan-milestone`; on no (default), done.
    - **[keep current]:** "Topic `{slug}` created and registered (still on `{current-topic}`). Switch with `start-session --switch-topic {slug}`, or plan into it directly with `plan-milestone --topic {slug}`."
 
 7. **Do not commit.**
@@ -184,7 +184,7 @@ Newest at top. Append-only summary of shipped milestones.
 
 ## Output
 
-Topic created at `.kss/topics/{slug}/` with five files + empty `milestones/` folder. PROJECT.md always updated (new `## Topics` row; possibly Carryover rows claimed). PROJECT.md frontmatter `active_topic` is set to `{slug}` **only if the topic is activated** — there is no `.kss/STATE.md`.
+Topic created at `.kss/topics/{slug}/` with five files + empty `milestones/` folder. PROJECT.md always updated (new `## Topics` row; possibly Carryover rows claimed). PROJECT.md frontmatter `active_topic` is set to `{slug}` **only if the topic is activated**.
 
 ## Conventions
 

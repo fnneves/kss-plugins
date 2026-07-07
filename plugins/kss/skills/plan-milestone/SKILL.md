@@ -136,7 +136,7 @@ Status legend: ○ pending · ◆ in-progress · ✓ done
 
 ## Output
 
-Milestone folder created with `PLAN.md`. The target topic's STATE.md updated (`active_milestone` set there — the single source of truth). The active pointer (`active_topic` in `.kss/PROJECT.md` frontmatter) is **never** touched by this skill: there is no project-level milestone pointer to set, and `--topic` mode does not move `active_topic`.
+Milestone folder created with `PLAN.md`. The target topic's STATE.md updated (`active_milestone` set there — the single source of truth). The active pointer (`active_topic` in `.kss/PROJECT.md` frontmatter) is **never** touched by this skill — `--topic` mode does not move it either.
 
 ## Conventions
 

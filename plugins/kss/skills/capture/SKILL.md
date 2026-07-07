@@ -11,7 +11,7 @@ Lightweight idea-drop. Use any time during a session. Three modes — seed, idea
 1. **Refuse if `.kss/` is missing.**
 
 2. **Soft-fail if no active topic** — read `active_topic` from `.kss/PROJECT.md` frontmatter. If it's `null`:
-   - Ask: "No active topic. Which topic should this go to? (list available, or `--project-level` to capture into PROJECT.md scratch)"
+   - Ask: "No active topic. Which topic should this go to? (list available, or `--project-level` for a genuinely cross-topic seed)"
 
 ## Inputs
 
@@ -45,17 +45,21 @@ Lightweight idea-drop. Use any time during a session. Three modes — seed, idea
    - Or, if substantive (>2 lines), suggest writing it as a note via `wrap-up`'s notes flow instead.
 
 4. **For scratch:**
-   - Append to a `## Scratch` section at the bottom of topic `LOG.md`. Keep it lightweight — overflow is fine; `distill` will sweep it later.
+   - Append to a `## Jotted` section at the bottom of topic `LOG.md`. (Named distinctly from STATE.md's `## Scratch` transient fence — that one is env facts re-verified by `start-session`; this one is loose notes.) Keep it lightweight — overflow is fine; `distill` will sweep it later.
    - Or, if the user prefers, hold it in conversation and let them drop it themselves.
 
-5. **Tell the user what happened.**
+5. **For `--project-level` captures:**
+   - Only seeds go project-level — an idea or scratch note always needs a topic (pick one, or hold the thought until it has a home).
+   - Append a row to `.kss/PROJECT.md` `## Carryover (cross-topic handoffs)` (lazy-create the section using `complete-milestone`'s template): Source = `capture`, Target topic = a named slug or `TBD`, and a **mandatory trigger** — same rule as seeds, no exceptions. Show the row written.
+
+6. **Tell the user what happened.**
    - "{type} captured. Continue your session."
 
-6. **Do not commit.**
+7. **Do not commit.**
 
 ## Conventions
 
 - **Trigger conditions are mandatory for seeds.** This is the single most important rule of the skill. The whole point is to prevent backlog rot — a seed without a trigger is worse than no seed at all.
 - **Triggers should be observable.** Good: "on next live session", "when polymarket switches to v3 API", "if we hit the FK race again". Bad: "someday", "when we have time", "eventually".
 - **Don't write seed bodies as essays.** One line per seed in the table. If the idea needs context, the trigger should reference it: `if we revisit auth refactor (see {note-path})`.
-- **Project-level capture is rare.** Most things belong to a topic. Resist capturing to PROJECT.md unless it's genuinely cross-topic.
+- **Project-level capture is rare.** Most things belong to a topic. When something genuinely is cross-topic, it lands as a trigger-gated `## Carryover` row (Target `TBD` if undecided) — PROJECT.md has no scratch section, and `new-topic` later offers to claim the row.

@@ -99,7 +99,7 @@ One of the four. If unsure, ask. Each reference file has:
 
 ### 4. Draft the HTML
 
-One file. Inline `<style>` and `<script>`. No build step. CDN policy is tiered by destination: `/tmp/` throwaways may pull from CDN freely (richer output, used now and closed); anything saved to `.planning/`, `docs/`, or the repo must be offline-safe so it still opens on a plane in six months — either pure vanilla, or vendor the library inline. See `assets/template.html` for the starting skeleton: editorial-paper design language (see below), the layout primitives (grid, card, pill, table.fields), and the dataset bootstrap pattern. See "Rich libraries" below for what to reach for when vanilla isn't enough.
+One file. Inline `<style>` and `<script>`. No build step. CDN policy is tiered by destination: `/tmp/` throwaways may pull from CDN freely (richer output, used now and closed); anything saved to a persistent location (`.kss/topics/<topic>/explorers/`, `docs/`, the repo) must be offline-safe so it still opens on a plane in six months — either pure vanilla, or vendor the library inline. See `assets/template.html` for the starting skeleton: editorial-paper design language (see below), the layout primitives (grid, card, pill, table.fields), and the dataset bootstrap pattern. See "Rich libraries" below for what to reach for when vanilla isn't enough.
 
 **Default design language: editorial-paper.** Pages built with this skill use a warm light palette (ivory `#FAF9F5` background, slate `#141413` text, clay `#D97757` accent), a three-font system (serif headings, sans body, mono for metadata/code), and editorial conventions (numbered section indices in the accent color, pill-shaped navigation, generous whitespace, hairline borders rather than heavy boxes). This matches the source-of-inspiration pages the skill is modelled on and produces artifacts that read as documents rather than dashboards. **Do not default to dark-theme dashboard styling.** That visual language signals "control panel" and undersells the page. If the user explicitly asks for dark mode, fine; otherwise, use the editorial-paper system.
 
@@ -165,7 +165,7 @@ Vanilla JS + the template primitives cover most explorers. When the topic genuin
 
 **When NOT to reach for these:** if the page is a static comparison or matrix, vanilla + the template primitives is faster to write, smaller, and offline. Don't pull D3 to render a 6-row table.
 
-**If the deliverable needs to persist** (`.planning/`, `docs/`, repo): either drop back to vanilla, or download the library file (`curl -o lib.js https://...`) and `<script src="lib.js">` it as a sidecar so the bundle survives a CDN going dark.
+**If the deliverable needs to persist** (`.kss/`, `docs/`, repo): either drop back to vanilla, or download the library file (`curl -o lib.js https://...`) and `<script src="lib.js">` it as a sidecar so the bundle survives a CDN going dark.
 
 ## Iteration pattern
 

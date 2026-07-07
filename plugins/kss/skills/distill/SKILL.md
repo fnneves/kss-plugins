@@ -1,5 +1,5 @@
 ---
-description: Extract durable insights from LOG.md and milestone notes and route each to its home — surprises/gotchas to CANONICAL-KB.md, code/analysis patterns to `.kss/codebase/CONVENTIONS.md`, structure/"where X lives" facts to `.kss/codebase/STRUCTURE.md`, domain terms to `.kss/codebase/VOCABULARY.md` — the rot-prevention pass. Use when the user wants to clean up notes, summarize recent learnings, pull out patterns, ask "what have I learned", or do periodic knowledge consolidation.
+description: Extract durable insights from LOG.md and milestone notes and route each to its home (CANONICAL-KB.md or the `.kss/codebase/` map files) — the rot-prevention pass. Use when the user wants to clean up notes, summarize recent learnings, pull out patterns, ask "what have I learned", or do periodic knowledge consolidation.
 ---
 
 # distill
@@ -10,7 +10,7 @@ The rot-prevention mechanism. Reads recent session work and pulls out what's *du
 
 1. **Refuse if `.kss/` is missing.**
 
-2. **Refuse if `.kss/CANONICAL-KB.md` is missing.** (Should always exist post-scaffold.)
+2. **Lazy-create `.kss/CANONICAL-KB.md` if missing** (should exist post-scaffold, but don't refuse over it) — use the `scaffold-project` template: frontmatter + Insights / Patterns / Gotchas sections. Same lazy-create discipline as the VOCABULARY and `## Learned` destinations.
 
 3. **Soft-fail if no active topic** — read `active_topic` from `.kss/PROJECT.md` frontmatter. If it's `null`, ask which topic to distill, or distill across all active topics. When enumerating "all active topics", read the `## Topics` list in `.kss/PROJECT.md` and **exclude any topic whose `TOPIC.md` frontmatter has `status: archived`** (archived topics also live under `## Archived Topics`).
 

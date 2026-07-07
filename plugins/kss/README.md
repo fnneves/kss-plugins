@@ -2,7 +2,7 @@
 
 **Solo dev framework with reduced ceremony and high customization.**
 
-I tested dozens of plugins, skills, and frameworks. I liked [GSD](https://github.com/gsd-build/get-shit-done) but wanted to make shit simpler — so I built this set of skills to keep my solo dev workflows organized and always ready to pick back up where I left them. Some of the lifecycle ideas (topic isolation, codebase map, trigger-conditioned seeds) are inspired by GSD; the multi-agent ceremony is not.
+Skills to keep solo dev workflows organized and always ready to pick back up where you left them. Some lifecycle ideas (topic isolation, codebase map, trigger-conditioned seeds) are inspired by [GSD](https://github.com/gsd-build/get-shit-done); the multi-agent ceremony is not.
 
 Mechanics: topics isolate unrelated work tracks; milestones scope finite work inside a topic; spikes test ideas before committing; canonical-KB captures durable cross-topic insights. An optional self-improvement loop (`skill-autopsy`) sharpens skills based on how you actually use them.
 
@@ -12,55 +12,23 @@ All state lives under `.kss/` at the project root.
 
 | Command | Layer | What it does |
 |---|---|---|
-| `/kss:scaffold-project` | Setup | Bootstrap `.kss/` shell. Run once per project. |
-| `/kss:map-codebase` | Setup | Generate or refresh `.kss/codebase/{STACK,STRUCTURE,CONVENTIONS,VOCABULARY}.md`. VOCABULARY is append-only across runs; `## Learned` fences in STRUCTURE/CONVENTIONS (written by `distill`) are preserved across reruns too. |
-| `/kss:new-topic` | Lifecycle | Create a topic under `.kss/topics/`. Offers to set it active (or register it and stay on the current topic). Surfaces inherited `## Carryover` handoffs to claim. |
-| `/kss:plan-milestone` | Lifecycle | Scope + plan a milestone within the active topic. `--topic <slug>` plans a parallel/non-active track without moving the active pointer. |
-| `/kss:complete-milestone` | Lifecycle | Close active milestone (writes SUMMARY.md). Offers to archive the topic when it's done; `--archive-topic` is a shortcut. Logs cross-topic handoffs to PROJECT.md `## Carryover`. |
-| `/kss:start-session` | Session | Load context for active topic + milestone; re-verifies transient `## Scratch` facts instead of re-asserting them. Run at session start. |
-| `/kss:spike` | Session | Throwaway exploration with verdict-driven outcome. Fires mid-session when an idea needs testing before commitment. |
-| `/kss:wrap-up` | Session | Append LOG entry, update STATE (transient env facts go under a `## Scratch` fence), optionally write a note. Offers to close the milestone when all tasks are done. Run at session end. |
-| `/kss:capture` | Knowledge | Drop a seed (with mandatory trigger), idea, or scratch note. |
-| `/kss:distill` | Knowledge | Extract durable insights from LOG + notes, routed across four homes: CANONICAL-KB (learnings/gotchas), codebase STRUCTURE/CONVENTIONS `## Learned` fences (structure & pattern facts), and VOCABULARY (terms). |
-| `/kss:skill-autopsy` | Meta | Log a short report when a skill underperformed, or analyze accumulated reports to propose SKILL.md improvements. |
-| `/kss:explore-html` | Utilities | Build a single-file interactive HTML page for exploration, comparison, reports, diagrams, slide decks, or drag-and-drop editors. Confirms format (HTML vs markdown) and destination path before drafting. |
-| `/kss:explore-notebook` | Utilities | Build a *served* interactive HTML notebook — live-reload, a real LAN-reachable URL, and a two-way feedback surface (Alt-click element pins, chat panel, agent markdown replies, click-to-open articles). The iterate-over-many-rounds sibling of `explore-html`; ships a bundled `serve.py`. |
-
-## Which skill when
-
-```mermaid
-flowchart TD
-    Setup{"First time<br/>in this project?"}
-    Setup -->|Yes| ScafMap["/kss:scaffold-project<br/>then /kss:map-codebase<br/><i>bootstrap .kss/ state files + codebase map</i>"]
-    Setup -->|No| Topic{"Starting work<br/>unrelated to<br/>the active topic?"}
-
-    ScafMap --> Topic
-
-    Topic -->|Yes| NewT["/kss:new-topic<br/><i>isolate the work track</i>"]
-    Topic -->|No| Mile{"Active milestone<br/>scoped?"}
-
-    NewT --> Mile
-
-    Mile -->|No| Plan["/kss:plan-milestone<br/><i>scope finite chunk + write PLAN.md</i>"]
-    Mile -->|Yes| Sess["/kss:start-session<br/><i>load topic + milestone context</i>"]
-
-    Plan --> Sess
-
-    Sess --> Work(("In session<br/>— now what?"))
-
-    Work --> W1["Test a risky idea first<br/>→ /kss:spike<br/><i>throwaway exploration, verdict-driven</i>"]
-    Work --> W2["Park a future idea<br/>→ /kss:capture<br/><i>seed/idea/note (seeds need triggers)</i>"]
-    Work --> W3["Notes / LOG piling up<br/>→ /kss:distill<br/><i>promote durable insights to CANONICAL-KB</i>"]
-    Work --> W4["A skill misfired<br/>→ /kss:skill-autopsy<br/><i>postmortem + propose SKILL.md fix</i>"]
-    Work --> W5["Milestone shipped<br/>→ /kss:complete-milestone<br/><i>close milestone, write SUMMARY.md</i>"]
-    Work --> W6["Ending session<br/>→ /kss:wrap-up<br/><i>append LOG entry + update STATE</i>"]
-    Work --> W7["Need a visual/interactive artifact<br/>→ /kss:explore-html<br/><i>HTML page: reports, diagrams, slides, side-by-side, kanban</i>"]
-    Work --> W8["Iterate on a served dashboard / control room<br/>→ /kss:explore-notebook<br/><i>live-reload + LAN URL + click-to-feedback</i>"]
-```
-
-Edge cases not in the diagram: rerun `map-codebase` after a major refactor; `plan-milestone --topic <slug>` to plan a parallel/non-active track without moving the active pointer; `complete-milestone` offers to archive a finished topic (`--archive-topic` skips straight to it); and `skill-autopsy --consolidate` to analyze accumulated reports.
+| `/kss:scaffold-project` | Setup | Bootstrap the `.kss/` shell. Run once per project. |
+| `/kss:map-codebase` | Setup | Generate or refresh the 4-file codebase snapshot under `.kss/codebase/`. |
+| `/kss:new-topic` | Lifecycle | Create a topic; offers activation and claiming inherited `## Carryover` handoffs. |
+| `/kss:plan-milestone` | Lifecycle | Scope + plan a milestone. `--topic <slug>` targets a non-active track. |
+| `/kss:complete-milestone` | Lifecycle | Close the active milestone (writes SUMMARY.md); offers to archive the topic (`--archive-topic` skips ahead). |
+| `/kss:start-session` | Session | Load context for the active topic + milestone; nudges triggered seeds and stale spikes. Run at session start. |
+| `/kss:spike` | Session | Throwaway exploration ending in a verdict (promote / kill / pivot). |
+| `/kss:wrap-up` | Session | Append a LOG entry, refresh STATE, optionally write a note; offers to close the milestone when all tasks are done. Run at session end. |
+| `/kss:capture` | Knowledge | Drop a seed (mandatory trigger), idea, or jotted note without leaving flow. |
+| `/kss:distill` | Knowledge | Route durable insights from LOG + notes to their four homes. The rot-prevention pass. |
+| `/kss:skill-autopsy` | Meta | Log a report when a skill underperformed; `--consolidate` proposes SKILL.md improvements from accumulated reports. |
+| `/kss:explore-html` | Utilities | Build a single-file interactive HTML page — reports, diagrams, decks, comparisons, editors. |
+| `/kss:explore-notebook` | Utilities | Build a *served* interactive HTML notebook — live-reload, LAN URL, on-page feedback and agent replies. The iterate-over-rounds sibling of `explore-html`. |
 
 ## Daily flow
+
+For the visual decision flow and the skill-interaction graph, see the [explainers](https://fnneves.github.io/kss-plugins/plugins/kss/explainers/).
 
 ```
 once per project:    /kss:scaffold-project → /kss:map-codebase
@@ -119,7 +87,7 @@ Flow:
         └── README.md      # question, approach, findings, verdict
 
 # Archiving a topic sets `status: archived` in its TOPIC.md and moves its PROJECT.md
-# row to ## Archived Topics — the directory stays in topics/. (.kss/archive/ is legacy.)
+# row to ## Archived Topics — the directory stays in topics/.
 ```
 
 ## Key conventions
@@ -161,17 +129,3 @@ If you want to tweak SKILL.md files locally (and optionally contribute improveme
 4. Continue installing kss from the marketplace as above for runtime; your clone is the writable workbench.
 
 For background on plugin marketplaces, version pinning, and source types, see the official Claude Code docs: <https://code.claude.com/docs/en/plugin-marketplaces>.
-
-### Plugin structure (for reference)
-
-```
-kss/
-├── .claude-plugin/
-│   └── plugin.json          # plugin manifest
-├── README.md
-└── skills/
-    ├── scaffold-project/SKILL.md
-    └── ...
-```
-
-The `name` field in `plugin.json` (`"kss"`) becomes the slash-command namespace automatically — no separate prefix configuration needed.

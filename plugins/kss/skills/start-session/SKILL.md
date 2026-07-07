@@ -34,7 +34,7 @@ Loads the minimum context needed to resume work: which topic, which milestone, w
 
 1. **Read project pointer, then derive the active milestone.**
    - `.kss/PROJECT.md` frontmatter → `active_topic`.
-   - Then read `.kss/topics/{active-topic}/STATE.md` frontmatter → `active_milestone` (this is the single source of truth — there is no project-level milestone pointer).
+   - Then read `.kss/topics/{active-topic}/STATE.md` frontmatter → `active_milestone` (the single source of truth).
 
 2. **Read topic state.**
    - `.kss/topics/{active-topic}/STATE.md` → current focus, blockers, next action (same file as step 1; you already have its frontmatter).
@@ -46,8 +46,9 @@ Loads the minimum context needed to resume work: which topic, which milestone, w
 4. **Read recent log entries.**
    - `.kss/topics/{active-topic}/LOG.md` → last 5 entries (newest are at top, so first 5 sections).
 
-5. **Surface triggered seeds (optional).**
+5. **Surface triggered seeds and stale spikes (optional).**
    - Read `SEEDS.md`. Call out any seeds whose trigger condition has plausibly been met. Don't block — just mention.
+   - Glance at `.kss/spikes/*/README.md` frontmatter. If any spike has `verdict: pending` and its `last_updated` is older than ~2 weeks, mention it in one line ("spike `{slug}` still pending a verdict — decide or kill via `spike`"). Don't block.
 
 6. **Display the session brief.**
 
@@ -77,6 +78,9 @@ Loads the minimum context needed to resume work: which topic, which milestone, w
 
    ## Triggered Seeds
    {only if any seeds' triggers are plausibly met; otherwise omit}
+
+   ## Pending Spikes
+   {only if any spike is `verdict: pending` and stale (~2+ weeks); one line each; otherwise omit}
 
    ## Possible Next Steps
    - {only if there's a clear obvious next action — keep this minimal, no auto-routing}

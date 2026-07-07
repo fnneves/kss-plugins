@@ -234,7 +234,7 @@
     <div class="eyebrow">kss · overview &amp; reference</div>
     <h1>Keep Shit <em>Simple</em></h1>
     <p class="lead">A solo-dev framework for Claude Code: reduced ceremony, durable state across sessions, an opt-in self-improvement loop. Thirteen small skills, a clean folder convention, and one governing principle — <em>detect, then offer</em>; never auto-fire.</p>
-    <p class="muted">v0.4.0 · the complete tour. For the other lenses, see the <a href="index.html">explainers index</a>; for the canonical command table, the <a href="../README.md"><code>README</code></a>.</p>
+    <p class="muted">v0.4.1 · the complete tour. For the other lenses, see the <a href="index.html">explainers index</a>; for the canonical command table, the <a href="../README.md"><code>README</code></a>.</p>
     <nav class="toc">
       <a href="#what">What kss is <span class="n">01</span></a>
       <a href="#principle">Detect-and-offer <span class="n">02</span></a>
@@ -296,7 +296,7 @@
         <h4 class="muted">Problem 05</h4>
         <h3>Risky exploration, expensive cleanup</h3>
         <p>You want to test "what if". Branching feels heavy; commit feels premature. Without a parking spot, exploration leaks into the main work.</p>
-        <p class="muted" style="font-size: 13px;">→ <code>spike</code> creates a throwaway folder under <code>.kss/spikes/</code> with one job: produce a verdict (keep / drop / promote).</p>
+        <p class="muted" style="font-size: 13px;">→ <code>spike</code> creates a throwaway folder under <code>.kss/spikes/</code> with one job: produce a verdict (promote / kill / pivot).</p>
       </div>
     </div>
 
@@ -463,7 +463,7 @@
         <div class="skill-head"><h4>scaffold-project</h4><span class="pill">setup</span></div>
         <div class="skill-body">
           <span class="label">When</span>Once per project. "set up kss", "scaffold", "bootstrap", "initialize planning".
-          <span class="label">What</span>Creates the <code>.kss/</code> shell — <code>PROJECT.md</code>, <code>CANONICAL-KB.md</code>, empty topic and spike folders. (No <code>.kss/STATE.md</code> — the active pointer lives in PROJECT.md frontmatter.)
+          <span class="label">What</span>Creates the <code>.kss/</code> shell — <code>PROJECT.md</code>, <code>CANONICAL-KB.md</code>, empty topic and spike folders. Offers to run <code>map-codebase</code> next.
         </div>
       </div>
       <div class="skill-card">
@@ -503,7 +503,7 @@
         <div class="skill-head"><h4>start-session</h4><span class="pill">session</span></div>
         <div class="skill-body">
           <span class="label">When</span>Beginning of work. "what was I working on", "where did we leave off", "catch me up".
-          <span class="label">What</span>Resolves <code>active_topic</code> from PROJECT.md, reads that topic's STATE + recent LOG + active milestone's PLAN. Re-verifies <code>## Scratch</code> facts instead of re-asserting them. Migrates a legacy <code>.kss/STATE.md</code> on first run.
+          <span class="label">What</span>Resolves <code>active_topic</code> from PROJECT.md, reads that topic's STATE + recent LOG + active milestone's PLAN. Re-verifies <code>## Scratch</code> facts instead of re-asserting them; nudges triggered seeds and stale pending spikes.
         </div>
       </div>
     </div>
@@ -534,7 +534,7 @@
         <div class="skill-head"><h4>capture</h4><span class="pill">knowledge</span></div>
         <div class="skill-body">
           <span class="label">When</span>Mid-flow, an idea or todo surfaces. "remind me to", "for later", "park this", "don't forget".
-          <span class="label">What</span>Drops a seed (with a <strong>mandatory trigger</strong> — items without triggers rot, so capture refuses them), a backlog idea, or a scratch note in the active topic's <code>SEEDS.md</code>.
+          <span class="label">What</span>Drops a seed into <code>SEEDS.md</code> (with a <strong>mandatory trigger</strong> — items without triggers rot, so capture refuses them), or a backlog idea / jotted note into <code>LOG.md</code>.
         </div>
       </div>
       <div class="skill-card">
@@ -713,9 +713,7 @@
 │               └── note-YYYYMMDD-*.md
 └── spikes/
     └── YYYYMMDD-&lt;slug&gt;/
-        └── README.md      <span class="cm"># question, approach, findings, verdict</span>
-
-<span class="cm"># No .kss/STATE.md and no .kss/archive/ — both are legacy (removed in v0.4.0).</span></code></pre>
+        └── README.md      <span class="cm"># question, approach, findings, verdict</span></code></pre>
 
     <div class="grid-2" style="margin-top: 22px;">
       <div class="card card-emph">
@@ -728,7 +726,7 @@
         <h4 class="muted">Archiving a topic</h4>
         <h3>A status flag, not a folder move</h3>
         <p>Archiving sets <code>status: archived</code> in the topic's <code>TOPIC.md</code> and moves its <code>PROJECT.md</code> row to <code>## Archived Topics</code>. The directory <strong>stays</strong> in <code>.kss/topics/</code>.</p>
-        <p style="margin-bottom: 0;">This resolves the old inconsistency with the "<code>SUMMARY.md</code> existence is the marker — don't move folders" convention. Skills exclude archived topics from active listings; <code>grep 'status: archived'</code> is the trail. The old <code>.kss/archive/</code> folder is legacy.</p>
+        <p style="margin-bottom: 0;">Same philosophy as the <code>SUMMARY.md</code> marker — state is encoded in structure, not folder moves. Skills exclude archived topics from active listings; <code>grep 'status: archived'</code> is the trail.</p>
       </div>
     </div>
 
@@ -758,7 +756,7 @@
         <tr><td>distill has four destinations</td><td class="note">CANONICAL-KB (learnings/gotchas) · STRUCTURE/CONVENTIONS <code>## Learned</code> fences (structure &amp; pattern facts) · VOCABULARY (terms).</td></tr>
         <tr><td>Detect-and-offer</td><td class="note">Skills may detect a condition and <em>offer</em> the next action behind a confirm; they never auto-fire a state change.</td></tr>
         <tr><td>Never auto-commit</td><td class="note">Skills modify files; you run <code>git</code>. Every change is a file you can review before it lands.</td></tr>
-        <tr><td>Single project pointer</td><td class="note"><code>active_topic</code> in PROJECT.md frontmatter; active milestone is derived. There is no <code>.kss/STATE.md</code>.</td></tr>
+        <tr><td>Single project pointer</td><td class="note"><code>active_topic</code> in PROJECT.md frontmatter; the active milestone is derived from that topic's <code>STATE.md</code>.</td></tr>
       </tbody>
     </table>
   </section>
@@ -770,7 +768,7 @@
     <div class="sec-head">
       <span class="idx">07</span>
       <h2>Install</h2>
-      <span class="count">v0.4.0</span>
+      <span class="count">v0.4.1</span>
     </div>
     <p class="sec-intro">Distributed via the <code>kss-plugins</code> marketplace. Inside Claude Code, three lines to install; then commands are invokable as <code>/kss:&lt;skill&gt;</code> in any project.</p>
     <pre><span class="cm"># add the marketplace + install</span>
@@ -788,7 +786,7 @@
 
   <footer>
     <span class="k">"Detection is free. Mutation is confirmed. Trust is earned by being legible."</span>
-    <span>kss v0.4.0 · <a href="https://github.com/fnneves/kss-plugins">fnneves/kss-plugins</a></span>
+    <span>kss v0.4.1 · <a href="https://github.com/fnneves/kss-plugins">fnneves/kss-plugins</a></span>
   </footer>
 
 </div>

@@ -61,7 +61,7 @@ Closes the active milestone. Writes a SUMMARY.md (the "shipped" marker), appends
 
 7. **Update topic's `STATE.md`.**
    - `status: between-milestones`.
-   - `active_milestone: null` — this is the **single source of truth** for the active milestone; there is no project-level milestone pointer to clear.
+   - `active_milestone: null` (the single source of truth for the active milestone).
    - Body: "Last shipped: {version}-{slug} on {date}. Run `plan-milestone` to scope the next."
 
 8. **Offer to archive the topic (SUGGEST-AND-CONFIRM).**
@@ -155,14 +155,14 @@ Lazy-create this section in `PROJECT.md` if it doesn't exist. Append one row per
 
 - New `SUMMARY.md` in the milestone folder (this is what marks it as "shipped").
 - Topic `MILESTONES.md` has a new top entry.
-- Topic `STATE.md` reset (`status: between-milestones`, `active_milestone: null`). There is no project-level STATE.md to reset.
+- Topic `STATE.md` reset (`status: between-milestones`, `active_milestone: null`).
 - Optionally: cross-topic/future handoffs appended to `PROJECT.md` `## Carryover (cross-topic handoffs)`.
 - Optionally: topic marked `status: archived` (the flag in `TOPIC.md`; PROJECT.md row moved to `## Archived Topics`; `active_topic: null`). Files stay in place at `.kss/topics/{slug}/` — no folder move.
 
 ## Conventions
 
-- **`SUMMARY.md` is the shipped marker.** Don't move folders into a separate archive subfolder; the file's existence is the signal. **Archiving a topic follows the same philosophy** — it's a `status: archived` flag, not a folder move (see next bullet), so this convention is now internally consistent.
-- **Archive is a status flag, offered, never forced or silent.** A normal close ends with the `[archive / keep]` offer (default keep); `--archive-topic` is only a shortcut to that offer, not a way to skip the confirm. Archiving sets `status: archived` in the topic's `TOPIC.md`, moves the PROJECT.md row to `## Archived Topics` with a one-line breadcrumb, and sets `active_topic: null` — the topic directory **stays at `.kss/topics/{slug}/`** (no `git mv` to `.kss/archive/`, which is legacy). Skills enumerating topics exclude `status: archived`. The trail is `grep 'status: archived'`.
+- **`SUMMARY.md` is the shipped marker.** Don't move folders into a separate archive subfolder; the file's existence is the signal. **Archiving a topic follows the same philosophy** — it's a `status: archived` flag, not a folder move (see next bullet).
+- **Archive is a status flag, offered, never forced or silent.** A normal close ends with the `[archive / keep]` offer (default keep); `--archive-topic` is only a shortcut to that offer, not a way to skip the confirm. Archiving sets `status: archived` in the topic's `TOPIC.md`, moves the PROJECT.md row to `## Archived Topics` with a one-line breadcrumb, and sets `active_topic: null` — the topic directory **stays at `.kss/topics/{slug}/`**. Skills enumerating topics exclude `status: archived`. The trail is `grep 'status: archived'`.
 - **Cross-topic handoffs are trigger-gated.** A deferred item bound for another/future topic goes to `PROJECT.md` `## Carryover` with a mandatory trigger — same discipline as SEEDS. Appending is AUTO-DO, but always show the row written.
 - **Be honest about gaps.** A `shipped-with-gaps` milestone is more useful than a fictional `shipped` one. Future-you will appreciate the truth.
 - **Don't auto-promote decisions to TOPIC.md.** Ask the user which ones are worth pulling up. Most decisions are milestone-local.

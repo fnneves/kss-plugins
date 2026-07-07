@@ -28,7 +28,7 @@ Interactive HTML explainers covering kss from different angles. Single-file arti
 
 Browse all explainers at <https://fnneves.github.io/kss-plugins/plugins/kss/explainers/>.
 
-For the plugin command reference and lifecycle diagram, see [`plugins/kss/README.md`](plugins/kss/README.md).
+For the plugin command reference and daily flow, see [`plugins/kss/README.md`](plugins/kss/README.md).
 
 ## Install
 
